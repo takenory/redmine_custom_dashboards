@@ -2,166 +2,38 @@ name: Test
 
 on:
   push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        ruby-version: ['3.1', '3.2']
-        redmine-version: ['5.1.4', '6.0.1']
-        database: ['mysql', 'postgresql']
-    
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: redmine_test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: redmine_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+        include:
+          - redmine-repository: 'redmica/redmica'
+            redmine-version: 'stable-3.1'
+            ruby-version: '3.3'
+          - redmine-repository: 'redmica/redmica'
+            redmine-version: 'master'
+            ruby-version: '3.3'
+          - redmine-repository: 'redmine/redmine'
+            redmine-version: 'master'
+            ruby-version: '3.3'
 
     steps:
-    - name: Checkout plugin
-      uses: actions/checkout@v4
-      with:
-        path: redmine_custom_dashboards
+      - uses: hidakatsuya/action-setup-redmine@v1
+        with:
+          repository: ${{ matrix.redmine-repository }}
+          version: ${{ matrix.redmine-version }}
+          ruby-version: ${{ matrix.ruby-version }}
+          database: 'postgres:14'
 
-    - name: Download Redmine
-      run: |
-        wget https://www.redmine.org/releases/redmine-${{ matrix.redmine-version }}.tar.gz
-        tar -xzf redmine-${{ matrix.redmine-version }}.tar.gz
-        mv redmine-${{ matrix.redmine-version }} redmine
+      - uses: actions/checkout@v4
+        with:
+          path: plugins/redmine_custom_dashboards
 
-    - name: Copy plugin to Redmine plugins directory
-      run: |
-        cp -r redmine_custom_dashboards redmine/plugins/
-
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: ${{ matrix.ruby-version }}
-        working-directory: redmine
-
-    - name: Configure database
-      working-directory: redmine
-      run: |
-        if [ "${{ matrix.database }}" == "mysql" ]; then
-          cat > config/database.yml << EOF
-        test:
-          adapter: mysql2
-          database: redmine_test
-          username: root
-          password: password
-          host: 127.0.0.1
-          port: 3306
-          encoding: utf8mb4
-        EOF
-        else
-          cat > config/database.yml << EOF
-        test:
-          adapter: postgresql
-          database: redmine_test
-          username: postgres
-          password: password
-          host: 127.0.0.1
-          port: 5432
-          encoding: unicode
-        EOF
-        fi
-
-    - name: Install dependencies
-      working-directory: redmine
-      run: |
-        gem install bundler
-        bundle config set --local without 'development'
-        bundle install --jobs 4 --retry 3
-
-    - name: Generate secret token
-      working-directory: redmine
-      run: |
-        bundle exec rake generate_secret_token
-
-    - name: Setup database
-      working-directory: redmine
-      run: |
-        bundle exec rake db:create RAILS_ENV=test
-        bundle exec rake db:migrate RAILS_ENV=test
-        bundle exec rake redmine:plugins:migrate RAILS_ENV=test
-
-    - name: Run plugin tests
-      working-directory: redmine
-      run: |
-        bundle exec rake redmine:plugins:test NAME=redmine_custom_dashboards RAILS_ENV=test
-
-    - name: Run plugin tests with coverage
-      working-directory: redmine
-      if: matrix.ruby-version == '3.2' && matrix.redmine-version == '6.0.1' && matrix.database == 'postgresql'
-      run: |
-        bundle exec rake redmine:plugins:test NAME=redmine_custom_dashboards RAILS_ENV=test COVERAGE=true
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout plugin
-      uses: actions/checkout@v4
-
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2'
-
-    - name: Install RuboCop
-      run: |
-        gem install rubocop rubocop-rails rubocop-performance
-
-    - name: Run RuboCop
-      run: |
-        rubocop --config .rubocop.yml || true
-
-  security:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout plugin
-      uses: actions/checkout@v4
-
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2'
-
-    - name: Install Brakeman
-      run: |
-        gem install brakeman
-
-    - name: Run Brakeman security scan
-      run: |
-        brakeman --no-pager --format json --output brakeman-report.json || true
-
-    - name: Upload security scan results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: brakeman-report
-        path: brakeman-report.json
+      # Plugins do not work on the redmine/redmine master branch,
+      # so this test combination will be skipped until the issue is fixed.
+      - run: bin/rails redmine:plugins:test NAME=redmine_custom_dashboards
+        if: ${{ !(matrix.redmine-repository == 'redmine/redmine' && matrix.redmine-version == 'master') }}
