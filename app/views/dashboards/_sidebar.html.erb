@@ -1,0 +1,23 @@
+<h3><%= l(:label_my_dashboards) %></h3>
+<% dashboards = User.current.dashboards.order(:name) %>
+<% if dashboards.any? %>
+  <ul>
+    <% dashboards.each do |dashboard| %>
+      <li>
+        <%= dashboard.name %>
+        <% if dashboard.is_default? %>
+          <span class="default-indicator">*</span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+  
+  <p>
+    <%= link_to l(:label_dashboard_new), new_dashboard_path, class: 'icon icon-add' %>
+  </p>
+<% else %>
+  <p><%= l(:label_no_data) %></p>
+  <p>
+    <%= link_to l(:label_dashboard_new), new_dashboard_path, class: 'icon icon-add' %>
+  </p>
+<% end %>

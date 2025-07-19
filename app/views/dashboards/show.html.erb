@@ -1,0 +1,40 @@
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'dashboards', plugin: 'redmine_custom_dashboards' %>
+<% end %>
+
+<div class="contextual">
+  <%= link_to l(:label_my_dashboards), my_dashboards_path, class: 'icon icon-multiple' %>
+  <% if @dashboard.user == User.current %>
+    <%= link_to l(:button_edit), edit_dashboard_path(@dashboard), class: 'icon icon-edit' %>
+  <% end %>
+</div>
+
+<h2>
+  <%= @dashboard.name %>
+  <% if @dashboard.is_default? %>
+    <span class="default-indicator">(<%= l(:label_dashboard_default) %>)</span>
+  <% end %>
+</h2>
+
+<% if @dashboard.description.present? %>
+  <div class="description">
+    <%= simple_format(h(@dashboard.description)) %>
+  </div>
+<% end %>
+
+<div class="dashboard-content">
+  <% if @dashboard.layout_config.present? %>
+    <div class="dashboard-widgets">
+      <!-- ここにウィジェットを表示 -->
+      <div class="widget-placeholder">
+        <p><%= l(:text_dashboard_widgets_placeholder) %></p>
+        <p><%= l(:text_dashboard_customize_hint) %></p>
+      </div>
+    </div>
+  <% else %>
+    <div class="nodata">
+      <p><%= l(:text_no_dashboard_widgets) %></p>
+      <p><%= link_to l(:label_dashboard_edit), edit_dashboard_path(@dashboard) %></p>
+    </div>
+  <% end %>
+</div>

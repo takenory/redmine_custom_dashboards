@@ -1,0 +1,29 @@
+/* Dashboard styles */
+.dashboards .default-dashboard {
+  background-color: #f0f8f0;
+}
+
+.dashboards .default-indicator {
+  color: #060;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.dashboards .name {
+  font-weight: bold;
+}
+
+.dashboards .default-actions {
+  text-align: center;
+  width: 80px;
+}
+
+.dashboards .buttons {
+  text-align: right;
+  white-space: nowrap;
+  width: 80px;
+}
+
+.dashboards .buttons a {
+  margin-left: 4px;
+}

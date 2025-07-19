@@ -1,0 +1,21 @@
+# Vim temporary files
+*.swp
+*.swo
+*~
+
+# Mac OS
+.DS_Store
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# IDE files
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
