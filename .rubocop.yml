@@ -1,0 +1,77 @@
+require:
+  - rubocop-rails
+  - rubocop-performance
+
+AllCops:
+  TargetRubyVersion: 3.1
+  NewCops: enable
+  Exclude:
+    - 'db/migrate/**/*'
+    - 'test/fixtures/**/*'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+
+# Rails specific configuration
+Rails:
+  Enabled: true
+
+# Performance specific configuration
+Performance:
+  Enabled: true
+
+# Style guidelines
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
+# Layout guidelines
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'config/routes.rb'
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+# Metrics
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*'
+    - 'config/routes.rb'
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/MethodLength:
+  Max: 20
+  Exclude:
+    - 'test/**/*'
+
+# Rails specific rules
+Rails/FilePath:
+  Enabled: false
+
+Rails/HasAndBelongsToMany:
+  Enabled: false
+
+Rails/SkipsModelValidations:
+  Exclude:
+    - 'test/**/*'
+
+# Naming
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
