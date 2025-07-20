@@ -5,12 +5,12 @@
 <% end %>
 
 <div class="contextual">
-  <%= link_to l(:label_my_dashboards), my_dashboards_path, class: 'icon icon-multiple' %>
+  <%= link_to sprite_icon('list', l(:label_my_dashboards)), my_dashboards_path, class: 'icon icon-list' %>
   <% if @dashboard.user == User.current %>
-    <%= link_to l(:button_edit), edit_dashboard_path(@dashboard), class: 'icon icon-edit' %>
-    <button id="toggle-customize" class="icon icon-configure" type="button">
-      <%= l(:button_customize_dashboard) %>
-    </button>
+    <%= link_to sprite_icon('edit', l(:button_edit)), edit_dashboard_path(@dashboard), class: 'icon icon-edit' %>
+    <%= link_to sprite_icon('settings', l(:button_customize_dashboard)), '#',
+                :id => 'toggle-customize',
+                :class => 'icon icon-settings' %>
   <% end %>
 </div>
 
@@ -41,16 +41,16 @@
       <option value="custom"><%= l(:label_panel_custom) %></option>
     </select>
     <button id="add-panel-btn" class="icon icon-add" type="button">
-      <%= l(:button_add_panel) %>
+      <%= sprite_icon('add', l(:button_add_panel)) %>
     </button>
   </div>
   
   <div class="toolbar-section">
     <button id="save-layout-btn" class="icon icon-save" type="button">
-      <%= l(:button_save_layout) %>
+      <%= sprite_icon('save', l(:button_save_layout)) %>
     </button>
     <button id="cancel-customize-btn" class="icon icon-cancel" type="button">
-      <%= l(:button_cancel) %>
+      <%= sprite_icon('cancel', l(:button_cancel)) %>
     </button>
   </div>
 </div>

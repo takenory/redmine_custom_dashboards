@@ -105,12 +105,14 @@ class DashboardCustomizer {
     if (this.isCustomizeMode) {
       container.classList.add('customize-mode');
       toolbar.style.display = 'block';
-      toggleBtn.textContent = 'カスタマイズ終了';
+      const iconLabel = toggleBtn.querySelector('.icon-label');
+      if (iconLabel) iconLabel.textContent = 'カスタマイズ終了';
       this.showMessage('カスタマイズモードを開始しました', 'info');
     } else {
       container.classList.remove('customize-mode');
       toolbar.style.display = 'none';
-      toggleBtn.textContent = 'カスタマイズ';
+      const iconLabel = toggleBtn.querySelector('.icon-label');
+      if (iconLabel) iconLabel.textContent = 'カスタマイズ';
       this.isAddingPanel = false;
       this.hidePreview();
       this.clearSelection();
