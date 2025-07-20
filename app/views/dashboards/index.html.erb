@@ -22,7 +22,7 @@
       <% @dashboards.each do |dashboard| %>
         <tr class="<%= cycle('odd', 'even') %> <%= 'default-dashboard' if dashboard.is_default? %>">
           <td class="name">
-            <%= dashboard.name %>
+            <%= link_to dashboard.name, dashboard_path(dashboard) %>
             <% if dashboard.is_default? %>
               <span class="default-indicator">(<%= l(:label_dashboard_default) %>)</span>
             <% end %>

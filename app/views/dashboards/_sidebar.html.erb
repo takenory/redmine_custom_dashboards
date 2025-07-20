@@ -4,7 +4,7 @@
   <ul>
     <% dashboards.each do |dashboard| %>
       <li>
-        <%= dashboard.name %>
+        <%= link_to dashboard.name, dashboard_path(dashboard) %>
         <% if dashboard.is_default? %>
           <span class="default-indicator">*</span>
         <% end %>
