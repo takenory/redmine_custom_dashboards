@@ -13,11 +13,11 @@
   </ul>
   
   <p>
-    <%= link_to l(:label_dashboard_new), new_dashboard_path, class: 'icon icon-add' %>
+    <%= link_to sprite_icon('add', l(:label_dashboard_new)), new_dashboard_path, class: 'icon icon-add' %>
   </p>
 <% else %>
   <p><%= l(:label_no_data) %></p>
   <p>
-    <%= link_to l(:label_dashboard_new), new_dashboard_path, class: 'icon icon-add' %>
+    <%= link_to sprite_icon('add', l(:label_dashboard_new)), new_dashboard_path, class: 'icon icon-add' %>
   </p>
 <% end %>

@@ -3,7 +3,7 @@
 <% end %>
 
 <div class="contextual">
-  <%= link_to l(:label_dashboard_new), new_dashboard_path, class: 'icon icon-add' %>
+  <%= link_to sprite_icon('add', l(:label_dashboard_new)), new_dashboard_path, class: 'icon icon-add' %>
 </div>
 
 <h2><%= l(:label_my_dashboards) %></h2>
@@ -30,7 +30,7 @@
           <td class="description"><%= dashboard.description %></td>
           <td class="default-actions">
             <% unless dashboard.is_default? %>
-              <%= link_to l(:label_dashboard_set_default), 
+              <%= link_to sprite_icon('checked', l(:label_dashboard_set_default)), 
                           set_default_dashboard_path(dashboard), 
                           method: :patch,
                           class: 'icon icon-checked',
@@ -38,8 +38,8 @@
             <% end %>
           </td>
           <td class="buttons">
-            <%= link_to l(:button_edit), edit_dashboard_path(dashboard), class: 'icon icon-edit' %>
-            <%= link_to l(:button_delete), 
+            <%= link_to sprite_icon('edit', l(:button_edit)), edit_dashboard_path(dashboard), class: 'icon icon-edit' %>
+            <%= link_to sprite_icon('del', l(:button_delete)), 
                         dashboard_path(dashboard), 
                         method: :delete,
                         data: { confirm: l(:text_are_you_sure) },
