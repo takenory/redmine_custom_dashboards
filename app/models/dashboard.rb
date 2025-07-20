@@ -1,5 +1,6 @@
 class Dashboard < ActiveRecord::Base
   belongs_to :user
+  has_many :dashboard_panels, dependent: :destroy
   
   validates :name, presence: true, length: { maximum: 100 }
   validates :user_id, presence: true
