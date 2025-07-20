@@ -27,4 +27,7 @@ jobs:
         with:
           path: plugins/redmine_custom_dashboards
 
+      - name: Run plugin migrations
+        run: bin/rails redmine:plugins:migrate RAILS_ENV=test
+
       - run: bin/rails redmine:plugins:test NAME=redmine_custom_dashboards
