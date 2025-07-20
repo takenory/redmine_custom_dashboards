@@ -1,11 +1,16 @@
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag 'dashboards', plugin: 'redmine_custom_dashboards' %>
+  <%= stylesheet_link_tag 'dashboard_panels', plugin: 'redmine_custom_dashboards' %>
+  <%= javascript_include_tag 'dashboard_customizer', plugin: 'redmine_custom_dashboards' %>
 <% end %>
 
 <div class="contextual">
   <%= link_to l(:label_my_dashboards), my_dashboards_path, class: 'icon icon-multiple' %>
   <% if @dashboard.user == User.current %>
     <%= link_to l(:button_edit), edit_dashboard_path(@dashboard), class: 'icon icon-edit' %>
+    <button id="toggle-customize" class="icon icon-configure" type="button">
+      <%= l(:button_customize_dashboard) %>
+    </button>
   <% end %>
 </div>
 
@@ -22,19 +27,81 @@
   </div>
 <% end %>
 
-<div class="dashboard-content">
-  <% if @dashboard.layout_config.present? %>
-    <div class="dashboard-widgets">
-      <!-- ここにウィジェットを表示 -->
-      <div class="widget-placeholder">
-        <p><%= l(:text_dashboard_widgets_placeholder) %></p>
-        <p><%= l(:text_dashboard_customize_hint) %></p>
-      </div>
-    </div>
-  <% else %>
-    <div class="nodata">
-      <p><%= l(:text_no_dashboard_widgets) %></p>
-      <p><%= link_to l(:label_dashboard_edit), edit_dashboard_path(@dashboard) %></p>
-    </div>
-  <% end %>
+<!-- カスタマイズモード時のツールバー -->
+<div id="customize-toolbar" class="customize-toolbar" style="display: none;">
+  <div class="toolbar-section">
+    <h3><%= l(:label_add_panel) %></h3>
+    <select id="panel-type-select">
+      <option value="text"><%= l(:label_panel_text) %></option>
+      <option value="chart"><%= l(:label_panel_chart) %></option>
+      <option value="list"><%= l(:label_panel_list) %></option>
+      <option value="calendar"><%= l(:label_panel_calendar) %></option>
+      <option value="issues"><%= l(:label_panel_issues) %></option>
+      <option value="activity"><%= l(:label_panel_activity) %></option>
+      <option value="custom"><%= l(:label_panel_custom) %></option>
+    </select>
+    <button id="add-panel-btn" class="icon icon-add" type="button">
+      <%= l(:button_add_panel) %>
+    </button>
+  </div>
+  
+  <div class="toolbar-section">
+    <button id="save-layout-btn" class="icon icon-save" type="button">
+      <%= l(:button_save_layout) %>
+    </button>
+    <button id="cancel-customize-btn" class="icon icon-cancel" type="button">
+      <%= l(:button_cancel) %>
+    </button>
+  </div>
 </div>
+
+<!-- ダッシュボード本体 -->
+<div id="dashboard-container" class="dashboard-container" data-dashboard-id="<%= @dashboard.id %>">
+  <div id="dashboard-grid" class="dashboard-grid">
+    <!-- グリッドの背景 -->
+    <div class="grid-background"></div>
+    
+    <!-- 既存のパネル -->
+    <% @dashboard.dashboard_panels.visible.ordered.each do |panel| %>
+      <div class="dashboard-panel" 
+           data-panel-id="<%= panel.id %>"
+           data-grid-x="<%= panel.grid_x %>"
+           data-grid-y="<%= panel.grid_y %>"
+           data-grid-width="<%= panel.grid_width %>"
+           data-grid-height="<%= panel.grid_height %>"
+           style="left: <%= panel.pixel_x %>px; top: <%= panel.pixel_y %>px; width: <%= panel.pixel_width %>px; height: <%= panel.pixel_height %>px; z-index: <%= panel.z_index %>;">
+        
+        <div class="panel-header">
+          <span class="panel-title"><%= h(panel.title) %></span>
+          <div class="panel-controls" style="display: none;">
+            <button class="panel-delete" data-panel-id="<%= panel.id %>" title="<%= l(:button_delete) %>">×</button>
+          </div>
+        </div>
+        
+        <div class="panel-content">
+          <%= render partial: "panels/#{panel.panel_type}", locals: { panel: panel } rescue render(partial: 'panels/default', locals: { panel: panel }) %>
+        </div>
+        
+        <!-- リサイズハンドル -->
+        <div class="resize-handle resize-se" style="display: none;"></div>
+      </div>
+    <% end %>
+    
+    <!-- パネル追加時のプレビュー -->
+    <div id="panel-preview" class="panel-preview" style="display: none;"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  window.dashboardCustomizer = new DashboardCustomizer({
+    dashboardId: <%= @dashboard.id %>,
+    gridSize: 20,
+    csrfToken: '<%= form_authenticity_token %>',
+    addPanelUrl: '<%= add_panel_dashboard_path(@dashboard) %>',
+    updatePanelUrl: '<%= update_panel_dashboard_path(@dashboard) %>',
+    deletePanelUrl: '<%= delete_panel_dashboard_path(@dashboard) %>',
+    updatePositionsUrl: '<%= update_panels_positions_dashboard_path(@dashboard) %>'
+  });
+});
+</script>

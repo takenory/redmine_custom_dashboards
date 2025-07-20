@@ -1,0 +1,244 @@
+/* Dashboard Container */
+.dashboard-container {
+  position: relative;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.dashboard-grid {
+  position: relative;
+  min-height: 800px;
+  border: 1px solid #ddd;
+  background-color: #fafafa;
+  overflow: hidden;
+}
+
+/* Grid Background */
+.grid-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(to right, #e0e0e0 1px, transparent 1px),
+    linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dashboard-container.customize-mode .grid-background {
+  opacity: 1;
+}
+
+/* Customize Toolbar */
+.customize-toolbar {
+  background: #f4f4f4;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-section h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+#panel-type-select {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+/* Dashboard Panels */
+.dashboard-panel {
+  position: absolute;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: move;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-panel:hover {
+  border-color: #999;
+}
+
+.dashboard-panel.selected {
+  border-color: #169bd5;
+  box-shadow: 0 0 8px rgba(22, 155, 213, 0.3);
+}
+
+.dashboard-panel.dragging {
+  opacity: 0.8;
+  z-index: 1000;
+  transform: rotate(2deg);
+}
+
+.dashboard-panel.resizing {
+  border-color: #169bd5;
+}
+
+/* Panel Header */
+.panel-header {
+  background: #f4f4f4;
+  border-bottom: 1px solid #ddd;
+  padding: 8px 12px;
+  font-weight: bold;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 28px;
+}
+
+.panel-title {
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.panel-delete {
+  background: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel-delete:hover {
+  background: #c9302c;
+}
+
+/* Panel Content */
+.panel-content {
+  padding: 12px;
+  height: calc(100% - 40px);
+  overflow: auto;
+}
+
+/* Resize Handles */
+.resize-handle {
+  position: absolute;
+  background: #169bd5;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.dashboard-panel:hover .resize-handle,
+.dashboard-panel.selected .resize-handle {
+  opacity: 0.8;
+}
+
+.resize-handle:hover {
+  opacity: 1;
+}
+
+.resize-se {
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  cursor: se-resize;
+  border-radius: 0 0 4px 0;
+}
+
+/* Panel Preview */
+.panel-preview {
+  position: absolute;
+  background: rgba(22, 155, 213, 0.2);
+  border: 2px dashed #169bd5;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 500;
+}
+
+.panel-preview.invalid {
+  background: rgba(217, 83, 79, 0.2);
+  border-color: #d9534f;
+}
+
+/* Customize Mode Styles */
+.dashboard-container.customize-mode .dashboard-panel {
+  cursor: move;
+}
+
+.dashboard-container.customize-mode .panel-controls {
+  display: flex !important;
+}
+
+.dashboard-container.customize-mode .resize-handle {
+  display: block !important;
+}
+
+/* Panel Types */
+.panel-default {
+  text-align: center;
+  color: #666;
+}
+
+.panel-info {
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.panel-placeholder {
+  padding: 20px;
+  background: #f9f9f9;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+}
+
+.panel-placeholder p {
+  margin: 0 0 5px 0;
+  color: #888;
+}
+
+.panel-placeholder small {
+  color: #aaa;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    min-height: 600px;
+  }
+  
+  .customize-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .toolbar-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
