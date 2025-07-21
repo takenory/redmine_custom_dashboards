@@ -100,12 +100,14 @@ class DashboardCustomizer {
     if (this.isCustomizeMode) {
       container.classList.add('customize-mode');
       toolbar.style.display = 'block';
+      this.disablePanelTooltips();
       const iconLabel = toggleBtn.querySelector('.icon-label');
       if (iconLabel) iconLabel.textContent = this.translations.customizeEnd || 'End Customize';
       this.showMessage(this.translations.customizeModeStarted || 'Customize mode started', 'info');
     } else {
       container.classList.remove('customize-mode');
       toolbar.style.display = 'none';
+      this.enablePanelTooltips();
       const iconLabel = toggleBtn.querySelector('.icon-label');
       if (iconLabel) iconLabel.textContent = this.translations.customize || 'Customize';
       this.isAddingPanel = false;
@@ -475,6 +477,26 @@ class DashboardCustomizer {
       this.selectedPanel.classList.remove('selected');
       this.selectedPanel = null;
     }
+  }
+
+  disablePanelTooltips() {
+    const deleteButtons = document.querySelectorAll('.panel-delete');
+    deleteButtons.forEach(btn => {
+      if (btn.title) {
+        btn.dataset.originalTitle = btn.title;
+        btn.removeAttribute('title');
+      }
+    });
+  }
+
+  enablePanelTooltips() {
+    const deleteButtons = document.querySelectorAll('.panel-delete');
+    deleteButtons.forEach(btn => {
+      if (btn.dataset.originalTitle) {
+        btn.title = btn.dataset.originalTitle;
+        delete btn.dataset.originalTitle;
+      }
+    });
   }
 
 
