@@ -64,3 +64,10 @@ en:
   text_wiki_help: "Wiki formatting: **bold**, *italic*, [link], * list item"
   text_preview_empty: "Nothing to preview yet."
   text_panel_config_saved: "Panel configuration saved successfully"
+
+  # Issues Panel Configuration
+  text_configure_issues_panel: "Click the configure button to set up which issues to display."
+  label_query_selection: "Select Query"
+  label_columns_selection: "Display Columns"
+  label_sort_criteria: "Sort Criteria"
+  text_issues_panel_help: "Configure which issues to display and how they should be presented."

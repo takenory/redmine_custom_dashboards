@@ -517,6 +517,158 @@
   background: white;
 }
 
+/* Issues Panel Configuration Styles */
+.panel-config-modal select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  width: 100%;
+  background: white;
+  height: 32px;
+}
+
+.columns-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  max-height: 120px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+
+.columns-selection label {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.columns-selection input[type="checkbox"] {
+  margin: 0 !important;
+}
+
+.sort-selection {
+  margin-top: 8px;
+}
+
+.sort-selection > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-selection select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+/* Issues Panel Content */
+.issues-panel-content {
+  padding: 0;
+}
+
+.issues-panel-content h3 {
+  margin-top: 0;
+  font-size: 14px;
+  padding: 8px 12px;
+  background: #f4f4f4;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 0;
+}
+
+.issues-panel-content .issues {
+  margin: 0;
+}
+
+.issues-panel-content .list.issues tr.issue {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.issues-panel-content .list.issues tr.issue:last-child {
+  border-bottom: none;
+}
+
+.issues-panel-content .list.issues td {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.issues-panel-content .nodata {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+/* Panel Loading Styles */
+.panel-loading {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.panel-loading:before {
+  content: "⏳";
+  margin-right: 8px;
+}
+
+/* Simple Issues List */
+.simple-issues-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.simple-issues-list .issue-item {
+  padding: 4px 8px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 12px;
+}
+
+.simple-issues-list .issue-id {
+  color: #666;
+  margin-right: 8px;
+}
+
+.simple-issues-list .issue-subject {
+  margin-right: 8px;
+}
+
+.simple-issues-list .issue-status {
+  color: #888;
+  font-size: 11px;
+}
+
+.debug-info {
+  font-size: 11px;
+  color: #666;
+  font-style: italic;
+  margin: 5px 0;
+}
+
+.error-message {
+  background: #ffe6e6;
+  border: 1px solid #ffcccc;
+  padding: 8px;
+  margin: 8px 0;
+  border-radius: 3px;
+}
+
+.error-message p {
+  margin: 4px 0;
+  font-size: 11px;
+  color: #cc0000;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .dashboard-grid {
