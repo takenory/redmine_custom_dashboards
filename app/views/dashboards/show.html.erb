@@ -17,9 +17,10 @@
 </div>
 
 <h2>
-  <%= @dashboard.name %>
   <% if @dashboard.is_default? %>
-    <span class="default-indicator">(<%= l(:label_dashboard_default) %>)</span>
+    <%= l(:label_dashboard) %>（<%= @dashboard.name %>）
+  <% else %>
+    <%= @dashboard.name %>
   <% end %>
 </h2>
 
