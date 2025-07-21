@@ -63,6 +63,7 @@
            data-grid-y="<%= panel.grid_y %>"
            data-grid-width="<%= panel.grid_width %>"
            data-grid-height="<%= panel.grid_height %>"
+           data-panel-config="<%= h(panel.config.to_json) %>"
            style="left: <%= panel.pixel_x %>px; top: <%= panel.pixel_y %>px; width: <%= panel.pixel_width %>px; height: <%= panel.pixel_height %>px; z-index: <%= panel.z_index %>;">
 
         <div class="panel-header">

@@ -544,10 +544,19 @@ class DashboardCustomizer {
   }
 
   getCurrentPanelContent(panel) {
-    // APIから現在のパネル設定を取得
     const panelId = panel.getAttribute('data-panel-id');
     
-    // 暫定的にパネル内のテキストコンテンツから取得を試行
+    // パネルに既に保存されているconfigからtext_contentを取得
+    if (panel.dataset.panelConfig) {
+      try {
+        const config = JSON.parse(panel.dataset.panelConfig);
+        return config.text_content || '';
+      } catch (e) {
+        console.warn('Failed to parse panel config:', e);
+      }
+    }
+    
+    // フォールバック: パネル内のテキストコンテンツから取得を試行
     const textContent = panel.querySelector('.text-panel-content');
     if (textContent) {
       // HTMLをプレーンテキストに変換（簡易版）
@@ -791,9 +800,28 @@ class DashboardCustomizer {
 
   updatePanelDisplay(panel, configData) {
     const content = panel.querySelector('.panel-content');
+    
+    // パネルのdata-panel-configを更新
+    panel.dataset.panelConfig = JSON.stringify(configData);
+    
     if (content && configData.text_content) {
-      const html = this.convertWikiToHtml(configData.text_content);
-      content.innerHTML = `<div class="text-panel-content">${html}</div>`;
+      // Redmineのプレビューエンドポイントを使用してフォーマットされたHTMLを取得
+      this.fetchRedminePreview(configData.text_content).then(html => {
+        content.innerHTML = `<div class="text-panel-content">${html}</div>`;
+      }).catch(error => {
+        console.error('Failed to format panel content:', error);
+        // フォールバック: 簡易フォーマットを使用
+        const fallbackHtml = this.convertWikiToHtml(configData.text_content);
+        content.innerHTML = `<div class="text-panel-content">${fallbackHtml}</div>`;
+      });
+    } else if (content) {
+      // コンテンツが空の場合はプレースホルダーを表示
+      content.innerHTML = `
+        <div class="panel-placeholder">
+          <p>${this.translations.panelContentPlaceholder || 'No content configured yet.'}</p>
+          <small>${this.translations.panelConfigRequired || 'Click the configure button to add content.'}</small>
+        </div>
+      `;
     }
   }
 
