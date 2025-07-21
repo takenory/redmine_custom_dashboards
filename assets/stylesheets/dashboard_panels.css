@@ -401,6 +401,52 @@
   text-decoration: underline;
 }
 
+/* Panel configuration styles */
+.panel-config-container {
+  width: 100%;
+}
+
+.common-config-section,
+.type-specific-config-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.type-specific-config-section:last-child {
+  border-bottom: none;
+}
+
+.common-config-section h4,
+.type-specific-config-section h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.panel-config-container input[type="text"] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.panel-config-container input[type="text"]:focus {
+  outline: none;
+  border-color: #169bd5;
+  box-shadow: 0 0 5px rgba(22, 155, 213, 0.3);
+}
+
+.info-message {
+  padding: 10px;
+  background: #f0f8ff;
+  border: 1px solid #bee5eb;
+  border-radius: 4px;
+  color: #0c5460;
+  margin: 0;
+}
+
 /* jsToolBar styles in modal */
 .panel-config-modal .jstBlock {
   width: 100%;

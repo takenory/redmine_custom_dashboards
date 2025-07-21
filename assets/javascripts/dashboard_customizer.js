@@ -457,33 +457,29 @@ class DashboardCustomizer {
     const panelId = panel.getAttribute('data-panel-id');
     const panelType = this.getPanelType(panel);
     
-    if (panelType === 'text') {
-      this.openTextPanelEditor(panel);
-    } else {
-      // 他のパネルタイプの設定は後で実装
-      console.log(`Configuration for ${panelType} panels not implemented yet`);
-    }
+    // 汎用的なパネル設定モーダルを開く
+    this.openPanelConfigurationModal(panel);
   }
 
   getPanelType(panel) {
-    // パネルから現在のタイプを取得
-    const panelInfo = panel.querySelector('.panel-info');
-    if (panelInfo) {
-      const text = panelInfo.textContent;
-      const match = text.match(/Panel Type:\s*(\w+)/);
-      return match ? match[1] : 'text';
-    }
-    return 'text'; // デフォルト
+    // パネルのdata-panel-type属性から取得
+    return panel.getAttribute('data-panel-type') || 'text';
+  }
+
+  openPanelConfigurationModal(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    const panelType = this.getPanelType(panel);
+    
+    // 汎用的な設定モーダルを作成
+    this.createConfigurationModal(panel, {
+      title: this.translations[`configure${panelType.charAt(0).toUpperCase() + panelType.slice(1)}Panel`] || `Configure ${panelType.charAt(0).toUpperCase() + panelType.slice(1)} Panel`,
+      content: this.createPanelConfigurationContent(panel)
+    });
   }
 
   openTextPanelEditor(panel) {
-    const panelId = panel.getAttribute('data-panel-id');
-    
-    // 編集モーダルを作成
-    this.createConfigurationModal(panel, {
-      title: this.translations.configureTextPanel || 'Configure Text Panel',
-      content: this.createTextEditorContent(panel)
-    });
+    // 後方互換性のため残すが、新しいメソッドを使用
+    this.openPanelConfigurationModal(panel);
   }
 
   createConfigurationModal(panel, options) {
@@ -518,6 +514,67 @@ class DashboardCustomizer {
 
     // モーダルイベントをバインド
     this.bindModalEvents(modal, panel);
+  }
+
+  createPanelConfigurationContent(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    const panelType = this.getPanelType(panel);
+    const currentTitle = panel.querySelector('.panel-title').textContent;
+    
+    // 共通のタイトル編集フィールド
+    let content = `
+      <div class="panel-config-container">
+        <div class="common-config-section">
+          <p>
+            <label for="panel_title_${panelId}">Panel Title</label>
+            <input type="text" id="panel_title_${panelId}" 
+                   name="panel[title]" 
+                   value="${this.escapeHtml(currentTitle)}"
+                   placeholder="Enter panel title"
+                   maxlength="100"
+                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+          </p>
+        </div>
+    `;
+    
+    // パネルタイプ固有の設定を追加
+    if (panelType === 'text') {
+      content += this.createTextPanelSpecificContent(panel);
+    } else {
+      content += `
+        <div class="type-specific-config-section">
+          <p class="info-message">
+            Content configuration for ${panelType} panels will be available in future updates.
+          </p>
+        </div>
+      `;
+    }
+    
+    content += '</div>';
+    return content;
+  }
+
+  createTextPanelSpecificContent(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    const currentContent = this.getCurrentPanelContent(panel);
+    const textareaId = `panel_text_content_${panelId}`;
+    
+    return `
+      <div class="type-specific-config-section">
+        <p>
+          <label for="${textareaId}">Text Content</label>
+          <textarea id="${textareaId}" 
+                    name="panel[text_content]"
+                    class="wiki-edit" 
+                    cols="60" 
+                    rows="15"
+                    data-auto-complete="true">${this.escapeHtml(currentContent)}</textarea>
+        </p>
+        <p class="formatting-help">
+          <small>You can use Wiki formatting: *bold*, _italic_, [[links]], etc.</small>
+        </p>
+      </div>
+    `;
   }
 
   createTextEditorContent(panel) {
@@ -763,23 +820,53 @@ class DashboardCustomizer {
 
   savePanelConfiguration(panel) {
     const panelId = panel.getAttribute('data-panel-id');
-    const textareaId = `panel_text_content_${panelId}`;
-    const textarea = document.getElementById(textareaId);
+    const panelType = this.getPanelType(panel);
     
-    if (!textarea) return;
-
-    const content = textarea.value;
+    // タイトルを取得
+    const titleInput = document.getElementById(`panel_title_${panelId}`);
+    const newTitle = titleInput ? titleInput.value.trim() : '';
     
-    // パネル設定を保存
-    const configData = {
-      text_content: content
-    };
-
-    this.updatePanelConfig(panelId, configData).then(() => {
-      // パネルコンテンツを更新
+    if (!newTitle) {
+      alert('Panel title is required');
+      return;
+    }
+    
+    // パネル設定データを収集
+    const configData = {};
+    
+    // テキストパネルの場合、テキストコンテンツも取得
+    if (panelType === 'text') {
+      const textareaId = `panel_text_content_${panelId}`;
+      const textarea = document.getElementById(textareaId);
+      if (textarea) {
+        configData.text_content = textarea.value;
+      }
+    }
+    
+    // タイトルとコンフィグの両方を更新
+    this.updatePanelTitleAndConfig(panelId, newTitle, configData).then(() => {
+      // パネル表示を更新
+      this.updatePanelTitleDisplay(panel, newTitle);
       this.updatePanelDisplay(panel, configData);
       this.closeConfigurationModal();
     });
+  }
+
+  updatePanelTitleAndConfig(panelId, title, configData) {
+    const panelData = {
+      title: title,
+      panel_config: JSON.stringify(configData)
+    };
+
+    return this.apiCall('PATCH', this.urls.updatePanel, { panel: panelData, panel_id: panelId })
+      .then(response => {
+        if (response.status === 'success') {
+          this.showMessage(this.translations.panelConfigSaved || 'Panel configuration saved', 'success');
+        } else {
+          this.showMessage(response.errors ? response.errors.join(', ') : 'Failed to save configuration', 'error');
+          throw new Error('Save failed');
+        }
+      });
   }
 
   updatePanelConfig(panelId, configData) {
@@ -796,6 +883,13 @@ class DashboardCustomizer {
           throw new Error('Save failed');
         }
       });
+  }
+
+  updatePanelTitleDisplay(panel, newTitle) {
+    const titleElement = panel.querySelector('.panel-title');
+    if (titleElement) {
+      titleElement.textContent = newTitle;
+    }
   }
 
   updatePanelDisplay(panel, configData) {
