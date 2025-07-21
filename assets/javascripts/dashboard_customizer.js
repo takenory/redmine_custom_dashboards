@@ -51,27 +51,32 @@ class DashboardCustomizer {
   bindPanelEvents() {
     const panels = document.querySelectorAll('.dashboard-panel');
     panels.forEach(panel => {
-      // ドラッグ開始
-      panel.addEventListener('mousedown', (e) => this.handlePanelMouseDown(e, panel));
-      
-      // パネル選択
-      panel.addEventListener('click', (e) => this.selectPanel(panel));
-
-      // 削除ボタン
-      const deleteBtn = panel.querySelector('.panel-delete');
-      if (deleteBtn) {
-        deleteBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.deletePanel(panel);
-        });
-      }
-
-      // リサイズハンドル
-      const resizeHandle = panel.querySelector('.resize-handle');
-      if (resizeHandle) {
-        resizeHandle.addEventListener('mousedown', (e) => this.handleResizeMouseDown(e, panel));
-      }
+      this.bindSinglePanelEvents(panel);
     });
+  }
+
+  bindSinglePanelEvents(panel) {
+    // ドラッグ開始
+    panel.addEventListener('mousedown', (e) => this.handlePanelMouseDown(e, panel));
+    
+    // パネル選択
+    panel.addEventListener('click', (e) => this.selectPanel(panel));
+
+    // 削除ボタン
+    const deleteBtn = panel.querySelector('.panel-delete');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.deletePanel(panel);
+      });
+    }
+
+    // リサイズハンドル
+    const resizeHandle = panel.querySelector('.resize-handle');
+    if (resizeHandle) {
+      resizeHandle.addEventListener('mousedown', (e) => this.handleResizeMouseDown(e, panel));
+    }
   }
 
   setupGrid() {
@@ -195,8 +200,8 @@ class DashboardCustomizer {
     panel.innerHTML = `
       <div class="panel-header">
         <span class="panel-title">${this.escapeHtml(panelData.title)}</span>
-        <div class="panel-controls" style="display: none;">
-          <button class="panel-delete" data-panel-id="${panelData.id}" title="${this.translations.deleteLabel || 'Delete'}">×</button>
+        <div class="panel-controls">
+          <a href="#" class="panel-delete" data-panel-id="${panelData.id}" title="${this.translations.deleteLabel || 'Delete'}"><span class="icon icon-close"></span></a>
         </div>
       </div>
       <div class="panel-content">
@@ -210,11 +215,11 @@ class DashboardCustomizer {
           </div>
         </div>
       </div>
-      <div class="resize-handle resize-se" style="display: none;"></div>
+      <div class="resize-handle resize-se"></div>
     `;
 
     grid.appendChild(panel);
-    this.bindPanelEvents();
+    this.bindSinglePanelEvents(panel);
   }
 
   handlePanelMouseDown(e, panel) {
@@ -443,6 +448,10 @@ class DashboardCustomizer {
     this.apiCall('DELETE', this.urls.deletePanel, { panel_id: panelId })
       .then(response => {
         if (response.status === 'success') {
+          // 選択状態をクリア
+          if (this.selectedPanel === panel) {
+            this.clearSelection();
+          }
           panel.remove();
           this.showMessage(response.message, 'success');
         } else {
@@ -467,6 +476,7 @@ class DashboardCustomizer {
       this.selectedPanel = null;
     }
   }
+
 
   showPreview(gridX, gridY, gridWidth, gridHeight) {
     let preview = document.getElementById('panel-preview');
