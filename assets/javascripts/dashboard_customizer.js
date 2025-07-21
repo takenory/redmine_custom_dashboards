@@ -201,7 +201,7 @@ class DashboardCustomizer {
       <div class="panel-header">
         <span class="panel-title">${this.escapeHtml(panelData.title)}</span>
         <div class="panel-controls">
-          <a href="#" class="panel-delete" data-panel-id="${panelData.id}" title="${this.translations.deleteLabel || 'Delete'}"><span class="icon icon-close"></span></a>
+          <a href="#" class="panel-delete" data-panel-id="${panelData.id}" title="${this.translations.deleteLabel || 'Delete'}">${this.translations.deleteIconSvg || '<svg class="s18 icon-svg" aria-hidden="true"><use href="/assets/icons-1857f271.svg#icon--close"></use></svg>'}</a>
         </div>
       </div>
       <div class="panel-content">
