@@ -401,6 +401,76 @@
   text-decoration: underline;
 }
 
+/* jsToolBar styles in modal */
+.panel-config-modal .jstBlock {
+  width: 100%;
+}
+
+.panel-config-modal .jstTabs.tabs {
+  margin-bottom: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.panel-config-modal .jstTabs.tabs ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  border-bottom: none;
+}
+
+.panel-config-modal .jstTabs.tabs li {
+  height: auto;
+  margin-right: 5px;
+}
+
+.panel-config-modal .jstTabs.tabs li a {
+  display: inline-block;
+  padding: 10px 15px;
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  text-decoration: none;
+  color: #333;
+  border-radius: 4px 4px 0 0;
+}
+
+.panel-config-modal .jstTabs.tabs li.selected a {
+  background: white;
+  border-bottom: 1px solid white;
+  position: relative;
+  z-index: 1;
+}
+
+.panel-config-modal .jstEditor {
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  padding: 0;
+}
+
+.panel-config-modal .jstEditor textarea {
+  width: 100%;
+  border: none;
+  padding: 10px;
+  resize: vertical;
+  font-family: Monaco, Menlo, 'Ubuntu Mono', monospace;
+  font-size: 13px;
+}
+
+.panel-config-modal .jstElements {
+  padding: 5px;
+  background: #f8f8f8;
+  border-bottom: 1px solid #ddd;
+  height: auto;
+}
+
+.panel-config-modal .wiki-preview {
+  padding: 10px;
+  min-height: 200px;
+  background: white;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .dashboard-grid {
