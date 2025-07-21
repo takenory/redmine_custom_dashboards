@@ -596,64 +596,31 @@ class DashboardCustomizer {
     const saveBtn = modal.querySelector('#save-panel-config');
     saveBtn.addEventListener('click', () => this.savePanelConfiguration(panel));
 
-    // Wikiツールバー関数をグローバルスコープに追加
-    this.addWikiToolbarFunctions();
+    // Wikiツールバーを初期化
+    this.initializeWikiToolbar(panel);
   }
 
-  addWikiToolbarFunctions() {
-    // insertMarkup関数をグローバルスコープに追加（Redmineスタイル）
-    if (!window.insertMarkup) {
-      window.insertMarkup = function(textareaId, prefix, suffix) {
-        const textarea = document.getElementById(textareaId);
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = textarea.value.substring(start, end);
-        
-        const newText = prefix + selectedText + suffix;
-        textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
-        
-        // カーソル位置を調整
-        const newCursorPos = start + prefix.length + selectedText.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-        textarea.focus();
-      };
-    }
-
-    // showPreview関数をグローバルスコープに追加
-    if (!window.showPreview) {
-      window.showPreview = (textareaId, panelId) => {
-        const textarea = document.getElementById(textareaId);
-        const preview = document.getElementById(`preview-${panelId}`);
-        
-        if (!textarea || !preview) return;
-
-        const content = textarea.value.trim();
-        
-        if (preview.style.display === 'none') {
-          // プレビューを表示
-          if (content) {
-            // Redmineのプレビューエンドポイントを使用
-            this.fetchRedminePreview(content).then(html => {
-              preview.innerHTML = html;
-              preview.style.display = 'block';
-            }).catch(error => {
-              console.error('Preview failed:', error);
-              // フォールバック: 簡易変換を使用
-              preview.innerHTML = this.convertWikiToHtml(content);
-              preview.style.display = 'block';
-            });
-          } else {
-            preview.innerHTML = this.translations.previewEmpty || 'Nothing to preview yet.';
-            preview.style.display = 'block';
-          }
-        } else {
-          // プレビューを非表示
-          preview.style.display = 'none';
+  initializeWikiToolbar(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    const textareaId = `panel_text_content_${panelId}`;
+    
+    // RedmineのjsToolBarを初期化
+    setTimeout(() => {
+      const textarea = document.getElementById(textareaId);
+      if (textarea && typeof jsToolBar === 'function') {
+        const wikiToolbar = new jsToolBar(textarea);
+        if (wikiToolbar.setHelpLink) {
+          wikiToolbar.setHelpLink('/help/wiki_syntax');
         }
-      }.bind(this);
-    }
+        if (wikiToolbar.setPreviewUrl) {
+          wikiToolbar.setPreviewUrl('/preview/text');
+        }
+        wikiToolbar.draw();
+        console.log('Wiki toolbar initialized for', textareaId);
+      } else {
+        console.log('jsToolBar not available, using basic textarea');
+      }
+    }, 100);
   }
 
   fetchRedminePreview(text) {
