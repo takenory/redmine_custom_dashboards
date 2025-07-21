@@ -3,6 +3,7 @@ class DashboardCustomizer {
     this.dashboardId = options.dashboardId;
     this.gridSize = options.gridSize || 20;
     this.csrfToken = options.csrfToken;
+    this.translations = options.translations || {};
     this.urls = {
       addPanel: options.addPanelUrl,
       updatePanel: options.updatePanelUrl,
@@ -106,17 +107,17 @@ class DashboardCustomizer {
       container.classList.add('customize-mode');
       toolbar.style.display = 'block';
       const iconLabel = toggleBtn.querySelector('.icon-label');
-      if (iconLabel) iconLabel.textContent = 'カスタマイズ終了';
-      this.showMessage('カスタマイズモードを開始しました', 'info');
+      if (iconLabel) iconLabel.textContent = this.translations.customizeEnd || 'End Customize';
+      this.showMessage(this.translations.customizeModeStarted || 'Customize mode started', 'info');
     } else {
       container.classList.remove('customize-mode');
       toolbar.style.display = 'none';
       const iconLabel = toggleBtn.querySelector('.icon-label');
-      if (iconLabel) iconLabel.textContent = 'カスタマイズ';
+      if (iconLabel) iconLabel.textContent = this.translations.customize || 'Customize';
       this.isAddingPanel = false;
       this.hidePreview();
       this.clearSelection();
-      this.showMessage('カスタマイズモードを終了しました', 'info');
+      this.showMessage(this.translations.customizeModeEnded || 'Customize mode ended', 'info');
     }
   }
 
@@ -124,7 +125,7 @@ class DashboardCustomizer {
     if (!this.isCustomizeMode) return;
     
     this.isAddingPanel = true;
-    this.showMessage('クリックして配置位置を指定してください', 'info');
+    this.showMessage(this.translations.clickToPlacePanel || 'Click to specify placement position', 'info');
     
     // マウス追従プレビュー
     document.addEventListener('mousemove', this.handleAddPanelMouseMove.bind(this));
@@ -182,7 +183,7 @@ class DashboardCustomizer {
         }
       })
       .catch(error => {
-        this.showMessage('パネルの追加に失敗しました', 'error');
+        this.showMessage(this.translations.panelAddFailed || 'Failed to add panel', 'error');
         console.error(error);
       });
   }
@@ -206,17 +207,17 @@ class DashboardCustomizer {
       <div class="panel-header">
         <span class="panel-title">${this.escapeHtml(panelData.title)}</span>
         <div class="panel-controls" style="display: none;">
-          <button class="panel-delete" data-panel-id="${panelData.id}" title="削除">×</button>
+          <button class="panel-delete" data-panel-id="${panelData.id}" title="${this.translations.deleteLabel || 'Delete'}">×</button>
         </div>
       </div>
       <div class="panel-content">
         <div class="panel-default">
           <div class="panel-info">
-            <strong>パネルタイプ:</strong> ${panelData.panel_type}
+            <strong>${this.translations.panelTypeFallback || 'Panel Type'}:</strong> ${panelData.panel_type}
           </div>
           <div class="panel-placeholder">
-            <p>パネルコンテンツのプレースホルダー</p>
-            <small>設定が必要です</small>
+            <p>${this.translations.panelContentPlaceholder || 'Panel content placeholder'}</p>
+            <small>${this.translations.panelConfigRequired || 'Configuration required'}</small>
           </div>
         </div>
       </div>
@@ -357,7 +358,7 @@ class DashboardCustomizer {
       panel.style.top = this.dragData.startTop + 'px';
       panel.setAttribute('data-grid-x', this.dragData.startGridX);
       panel.setAttribute('data-grid-y', this.dragData.startGridY);
-      this.showMessage('パネルが重複するため移動できません', 'error');
+      this.showMessage(this.translations.panelMoveBlocked || 'Cannot move panel due to overlap', 'error');
     }
 
     panel.classList.remove('invalid');
@@ -383,7 +384,7 @@ class DashboardCustomizer {
       panel.style.height = this.resizeData.startHeight + 'px';
       panel.setAttribute('data-grid-width', this.resizeData.startGridWidth);
       panel.setAttribute('data-grid-height', this.resizeData.startGridHeight);
-      this.showMessage('パネルが重複するためリサイズできません', 'error');
+      this.showMessage(this.translations.panelResizeBlocked || 'Cannot resize panel due to overlap', 'error');
     }
 
     panel.classList.remove('invalid');
@@ -434,19 +435,19 @@ class DashboardCustomizer {
     this.apiCall('PATCH', this.urls.updatePanel, { panel: panelData, panel_id: panelId })
       .then(response => {
         if (response.status === 'success') {
-          this.showMessage('パネルを更新しました', 'success');
+          this.showMessage(this.translations.panelUpdated || 'Panel updated successfully', 'success');
         } else {
           this.showMessage(response.errors.join(', '), 'error');
         }
       })
       .catch(error => {
-        this.showMessage('パネルの更新に失敗しました', 'error');
+        this.showMessage(this.translations.panelUpdateFailed || 'Failed to update panel', 'error');
         console.error(error);
       });
   }
 
   deletePanel(panel) {
-    if (!confirm('このパネルを削除しますか？')) return;
+    if (!confirm(this.translations.confirmDeletePanel || 'Are you sure you want to delete this panel?')) return;
 
     const panelId = panel.getAttribute('data-panel-id');
 
@@ -460,7 +461,7 @@ class DashboardCustomizer {
         }
       })
       .catch(error => {
-        this.showMessage('パネルの削除に失敗しました', 'error');
+        this.showMessage(this.translations.panelDeleteFailed || 'Failed to delete panel', 'error');
         console.error(error);
       });
   }
@@ -528,26 +529,26 @@ class DashboardCustomizer {
   }
 
   saveLayout() {
-    this.showMessage('レイアウトを保存しました', 'success');
+    this.showMessage(this.translations.layoutSaved || 'Layout saved successfully', 'success');
   }
 
   cancelCustomize() {
-    if (confirm('変更を破棄してカスタマイズモードを終了しますか？')) {
+    if (confirm(this.translations.confirmDiscardChanges || 'Discard changes and exit customize mode?')) {
       this.toggleCustomizeMode();
     }
   }
 
   getPanelTypeTitle(type) {
     const titles = {
-      text: 'テキストパネル',
-      chart: 'チャートパネル',
-      list: 'リストパネル',
-      calendar: 'カレンダーパネル',
-      issues: '課題パネル',
-      activity: 'アクティビティパネル',
-      custom: 'カスタムパネル'
+      text: this.translations.panelTypeText || 'Text Panel',
+      chart: this.translations.panelTypeChart || 'Chart Panel',
+      list: this.translations.panelTypeList || 'List Panel',
+      calendar: this.translations.panelTypeCalendar || 'Calendar Panel',
+      issues: this.translations.panelTypeIssues || 'Issues Panel',
+      activity: this.translations.panelTypeActivity || 'Activity Panel',
+      custom: this.translations.panelTypeCustom || 'Custom Panel'
     };
-    return titles[type] || 'パネル';
+    return titles[type] || (this.translations.panelTypeFallback || 'Panel');
   }
 
   getNextZIndex() {
