@@ -211,6 +211,196 @@
   color: #aaa;
 }
 
+/* Panel Configuration Modal */
+.panel-config-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+}
+
+.panel-config-modal .modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.panel-config-modal .modal-dialog {
+  position: relative;
+  margin: 50px auto;
+  width: 90%;
+  max-width: 800px;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.panel-config-modal .modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-config-modal .modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.panel-config-modal .modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel-config-modal .modal-body {
+  padding: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.panel-config-modal .modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #e5e5e5;
+  text-align: right;
+}
+
+.panel-config-modal .modal-footer .btn {
+  margin-left: 10px;
+}
+
+/* Text Editor Styles */
+.text-editor-container {
+  width: 100%;
+}
+
+.editor-tabs {
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 15px;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+}
+
+.tab-button.active {
+  border-bottom-color: #169bd5;
+  color: #169bd5;
+  font-weight: bold;
+}
+
+.tab-button:hover {
+  background: #f5f5f5;
+}
+
+.tab-content {
+  position: relative;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+.wiki-textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: Monaco, Menlo, 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.wiki-textarea:focus {
+  outline: none;
+  border-color: #169bd5;
+  box-shadow: 0 0 5px rgba(22, 155, 213, 0.3);
+}
+
+.formatting-help {
+  margin-top: 8px;
+  color: #666;
+}
+
+.wiki-preview {
+  min-height: 300px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+  line-height: 1.6;
+}
+
+.wiki-preview h1, .wiki-preview h2, .wiki-preview h3 {
+  margin-top: 0;
+}
+
+.wiki-preview ul, .wiki-preview ol {
+  padding-left: 20px;
+}
+
+.wiki-preview a {
+  color: #169bd5;
+  text-decoration: none;
+}
+
+.wiki-preview a:hover {
+  text-decoration: underline;
+}
+
+/* Text Panel Content */
+.text-panel-content {
+  padding: 10px;
+  line-height: 1.6;
+}
+
+.text-panel-content h1, .text-panel-content h2, .text-panel-content h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.text-panel-content p {
+  margin-bottom: 10px;
+}
+
+.text-panel-content ul, .text-panel-content ol {
+  margin-bottom: 10px;
+  padding-left: 20px;
+}
+
+.text-panel-content a {
+  color: #169bd5;
+  text-decoration: none;
+}
+
+.text-panel-content a:hover {
+  text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .dashboard-grid {
@@ -225,5 +415,18 @@
   .toolbar-section {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .panel-config-modal .modal-dialog {
+    margin: 20px;
+    width: calc(100% - 40px);
+  }
+
+  .wiki-textarea {
+    min-height: 200px;
+  }
+
+  .wiki-preview {
+    min-height: 200px;
   }
 }

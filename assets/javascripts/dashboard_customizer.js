@@ -62,6 +62,16 @@ class DashboardCustomizer {
     // パネル選択
     panel.addEventListener('click', (e) => this.selectPanel(panel));
 
+    // 設定ボタン
+    const configureBtn = panel.querySelector('.panel-configure');
+    if (configureBtn) {
+      configureBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.configurePanel(panel);
+      });
+    }
+
     // 削除ボタン
     const deleteBtn = panel.querySelector('.panel-delete');
     if (deleteBtn) {
@@ -203,6 +213,7 @@ class DashboardCustomizer {
       <div class="panel-header">
         <span class="panel-title">${this.escapeHtml(panelData.title)}</span>
         <div class="panel-controls">
+          <a href="#" class="panel-configure" data-panel-id="${panelData.id}" title="${this.translations.configureLabel || 'Configure'}">${this.translations.configureIconSvg || '<svg class="s18 icon-svg" aria-hidden="true"><use href="/assets/icons-1857f271.svg#icon--settings"></use></svg>'}</a>
           <a href="#" class="panel-delete" data-panel-id="${panelData.id}" title="${this.translations.deleteLabel || 'Delete'}">${this.translations.deleteIconSvg || '<svg class="s18 icon-svg" aria-hidden="true"><use href="/assets/icons-1857f271.svg#icon--close"></use></svg>'}</a>
         </div>
       </div>
@@ -442,6 +453,342 @@ class DashboardCustomizer {
       });
   }
 
+  configurePanel(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    const panelType = this.getPanelType(panel);
+    
+    if (panelType === 'text') {
+      this.openTextPanelEditor(panel);
+    } else {
+      // 他のパネルタイプの設定は後で実装
+      console.log(`Configuration for ${panelType} panels not implemented yet`);
+    }
+  }
+
+  getPanelType(panel) {
+    // パネルから現在のタイプを取得
+    const panelInfo = panel.querySelector('.panel-info');
+    if (panelInfo) {
+      const text = panelInfo.textContent;
+      const match = text.match(/Panel Type:\s*(\w+)/);
+      return match ? match[1] : 'text';
+    }
+    return 'text'; // デフォルト
+  }
+
+  openTextPanelEditor(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    
+    // 編集モーダルを作成
+    this.createConfigurationModal(panel, {
+      title: this.translations.configureTextPanel || 'Configure Text Panel',
+      content: this.createTextEditorContent(panel)
+    });
+  }
+
+  createConfigurationModal(panel, options) {
+    // 既存のモーダルがあれば削除
+    const existingModal = document.getElementById('panel-config-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    // モーダル要素を作成
+    const modal = document.createElement('div');
+    modal.id = 'panel-config-modal';
+    modal.className = 'panel-config-modal';
+    modal.innerHTML = `
+      <div class="modal-backdrop"></div>
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>${options.title}</h3>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          ${options.content}
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="save-panel-config">${this.translations.buttonSave || 'Save'}</button>
+          <button class="btn btn-secondary" id="cancel-panel-config">${this.translations.buttonCancel || 'Cancel'}</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // モーダルイベントをバインド
+    this.bindModalEvents(modal, panel);
+  }
+
+  createTextEditorContent(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    const currentContent = this.getCurrentPanelContent(panel);
+    const textareaId = `panel_text_content_${panelId}`;
+    
+    return `
+      <div class="text-editor-container">
+        <p>
+          <label for="${textareaId}">Text Content</label>
+          <textarea id="${textareaId}" 
+                    name="panel[text_content]"
+                    class="wiki-edit" 
+                    cols="60" 
+                    rows="15"
+                    data-auto-complete="true">${this.escapeHtml(currentContent)}</textarea>
+        </p>
+        <p class="formatting-help">
+          <small>You can use Wiki formatting: *bold*, _italic_, [[links]], etc.</small>
+        </p>
+      </div>
+    `;
+  }
+
+  getCurrentPanelContent(panel) {
+    // APIから現在のパネル設定を取得
+    const panelId = panel.getAttribute('data-panel-id');
+    
+    // 暫定的にパネル内のテキストコンテンツから取得を試行
+    const textContent = panel.querySelector('.text-panel-content');
+    if (textContent) {
+      // HTMLをプレーンテキストに変換（簡易版）
+      return this.htmlToPlainText(textContent.innerHTML);
+    }
+    
+    return ''; // デフォルトは空
+  }
+
+  htmlToPlainText(html) {
+    // HTMLタグを除去してプレーンテキストに変換
+    let text = html;
+    
+    // <br> -> 改行
+    text = text.replace(/<br\s*\/?>/gi, '\n');
+    
+    // <li> -> * 
+    text = text.replace(/<li[^>]*>/gi, '* ');
+    text = text.replace(/<\/li>/gi, '\n');
+    
+    // その他のHTMLタグを除去
+    text = text.replace(/<[^>]+>/g, '');
+    
+    // HTMLエンティティをデコード
+    text = text.replace(/&lt;/g, '<');
+    text = text.replace(/&gt;/g, '>');
+    text = text.replace(/&amp;/g, '&');
+    text = text.replace(/&quot;/g, '"');
+    
+    return text.trim();
+  }
+
+  bindModalEvents(modal, panel) {
+    // 閉じるボタン
+    const closeBtn = modal.querySelector('.modal-close');
+    const cancelBtn = modal.querySelector('#cancel-panel-config');
+    
+    closeBtn.addEventListener('click', () => this.closeConfigurationModal());
+    cancelBtn.addEventListener('click', () => this.closeConfigurationModal());
+    
+    // バックドロップクリックで閉じる
+    const backdrop = modal.querySelector('.modal-backdrop');
+    backdrop.addEventListener('click', () => this.closeConfigurationModal());
+
+    // 保存ボタン
+    const saveBtn = modal.querySelector('#save-panel-config');
+    saveBtn.addEventListener('click', () => this.savePanelConfiguration(panel));
+
+    // Wikiツールバー関数をグローバルスコープに追加
+    this.addWikiToolbarFunctions();
+  }
+
+  addWikiToolbarFunctions() {
+    // insertMarkup関数をグローバルスコープに追加（Redmineスタイル）
+    if (!window.insertMarkup) {
+      window.insertMarkup = function(textareaId, prefix, suffix) {
+        const textarea = document.getElementById(textareaId);
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+        
+        const newText = prefix + selectedText + suffix;
+        textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+        
+        // カーソル位置を調整
+        const newCursorPos = start + prefix.length + selectedText.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        textarea.focus();
+      };
+    }
+
+    // showPreview関数をグローバルスコープに追加
+    if (!window.showPreview) {
+      window.showPreview = (textareaId, panelId) => {
+        const textarea = document.getElementById(textareaId);
+        const preview = document.getElementById(`preview-${panelId}`);
+        
+        if (!textarea || !preview) return;
+
+        const content = textarea.value.trim();
+        
+        if (preview.style.display === 'none') {
+          // プレビューを表示
+          if (content) {
+            // Redmineのプレビューエンドポイントを使用
+            this.fetchRedminePreview(content).then(html => {
+              preview.innerHTML = html;
+              preview.style.display = 'block';
+            }).catch(error => {
+              console.error('Preview failed:', error);
+              // フォールバック: 簡易変換を使用
+              preview.innerHTML = this.convertWikiToHtml(content);
+              preview.style.display = 'block';
+            });
+          } else {
+            preview.innerHTML = this.translations.previewEmpty || 'Nothing to preview yet.';
+            preview.style.display = 'block';
+          }
+        } else {
+          // プレビューを非表示
+          preview.style.display = 'none';
+        }
+      }.bind(this);
+    }
+  }
+
+  fetchRedminePreview(text) {
+    // Redmineのプレビューエンドポイントを使用
+    return fetch('/preview/text', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRF-Token': this.csrfToken
+      },
+      body: new URLSearchParams({
+        'text': text,
+        'format': 'textile'
+      })
+    })
+    .then(response => response.text())
+    .then(html => {
+      // レスポンスからプレビュー部分を抽出
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const preview = doc.querySelector('.preview');
+      return preview ? preview.innerHTML : html;
+    });
+  }
+
+  switchTab(tabName) {
+    const modal = document.getElementById('panel-config-modal');
+    
+    // タブボタンの状態を更新
+    modal.querySelectorAll('.tab-button').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+
+    // タブコンテンツの表示を更新
+    modal.querySelectorAll('.tab-pane').forEach(pane => {
+      pane.classList.toggle('active', pane.id === `${tabName}-tab`);
+    });
+
+    // プレビュータブが選択されたら内容を更新
+    if (tabName === 'preview') {
+      this.updatePreview();
+    }
+  }
+
+  updatePreview() {
+    const textarea = document.getElementById('panel-text-content');
+    const preview = document.getElementById('panel-text-preview');
+    
+    if (textarea && preview) {
+      const content = textarea.value.trim();
+      if (content) {
+        // 簡単なWikiフォーマット変換
+        const html = this.convertWikiToHtml(content);
+        preview.innerHTML = html;
+      } else {
+        preview.innerHTML = this.translations.previewEmpty || 'Nothing to preview yet.';
+      }
+    }
+  }
+
+  convertWikiToHtml(wikiText) {
+    // 基本的なWikiフォーマット変換
+    let html = this.escapeHtml(wikiText);
+    
+    // **bold** -> <strong>bold</strong>
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // *italic* -> <em>italic</em>  
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // [link] -> <a href="link">link</a>
+    html = html.replace(/\[([^\]]+)\]/g, '<a href="$1">$1</a>');
+    
+    // 行頭の * -> リスト項目
+    html = html.replace(/^\* (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>\s*)+/gs, '<ul>$&</ul>');
+    
+    // 改行を <br> に変換
+    html = html.replace(/\n/g, '<br>');
+    
+    return html;
+  }
+
+  savePanelConfiguration(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    const textareaId = `panel_text_content_${panelId}`;
+    const textarea = document.getElementById(textareaId);
+    
+    if (!textarea) return;
+
+    const content = textarea.value;
+    
+    // パネル設定を保存
+    const configData = {
+      text_content: content
+    };
+
+    this.updatePanelConfig(panelId, configData).then(() => {
+      // パネルコンテンツを更新
+      this.updatePanelDisplay(panel, configData);
+      this.closeConfigurationModal();
+    });
+  }
+
+  updatePanelConfig(panelId, configData) {
+    const panelData = {
+      panel_config: JSON.stringify(configData)
+    };
+
+    return this.apiCall('PATCH', this.urls.updatePanel, { panel: panelData, panel_id: panelId })
+      .then(response => {
+        if (response.status === 'success') {
+          this.showMessage(this.translations.panelConfigSaved || 'Panel configuration saved', 'success');
+        } else {
+          this.showMessage(response.errors ? response.errors.join(', ') : 'Failed to save configuration', 'error');
+          throw new Error('Save failed');
+        }
+      });
+  }
+
+  updatePanelDisplay(panel, configData) {
+    const content = panel.querySelector('.panel-content');
+    if (content && configData.text_content) {
+      const html = this.convertWikiToHtml(configData.text_content);
+      content.innerHTML = `<div class="text-panel-content">${html}</div>`;
+    }
+  }
+
+  closeConfigurationModal() {
+    const modal = document.getElementById('panel-config-modal');
+    if (modal) {
+      modal.remove();
+    }
+  }
+
   deletePanel(panel) {
     if (!confirm(this.translations.confirmDeletePanel || 'Are you sure you want to delete this panel?')) return;
 
@@ -480,8 +827,8 @@ class DashboardCustomizer {
   }
 
   disablePanelTooltips() {
-    const deleteButtons = document.querySelectorAll('.panel-delete');
-    deleteButtons.forEach(btn => {
+    const controlButtons = document.querySelectorAll('.panel-configure, .panel-delete');
+    controlButtons.forEach(btn => {
       if (btn.title) {
         btn.dataset.originalTitle = btn.title;
         btn.removeAttribute('title');
@@ -490,8 +837,8 @@ class DashboardCustomizer {
   }
 
   enablePanelTooltips() {
-    const deleteButtons = document.querySelectorAll('.panel-delete');
-    deleteButtons.forEach(btn => {
+    const controlButtons = document.querySelectorAll('.panel-configure, .panel-delete');
+    controlButtons.forEach(btn => {
       if (btn.dataset.originalTitle) {
         btn.title = btn.dataset.originalTitle;
         delete btn.dataset.originalTitle;

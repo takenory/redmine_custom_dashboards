@@ -51,4 +51,16 @@ ja:
   text_panel_resize_blocked: "パネルが重複するためリサイズできません"
   text_confirm_delete_panel: "このパネルを削除しますか？"
   button_customize_end: "カスタマイズ終了"
+  button_configure: "設定"
+  button_save: "保存"
+  button_cancel: "キャンセル"
   label_delete: "削除"
+
+  # Text Panel Configuration
+  text_configure_text_panel: "テキストパネルの設定"
+  text_tab_edit: "編集"
+  text_tab_preview: "プレビュー"
+  text_placeholder: "ここにテキストを入力してください... Wikiフォーマットが使用できます。"
+  text_wiki_help: "Wikiフォーマット: **太字**, *斜体*, [リンク], * リスト項目"
+  text_preview_empty: "プレビューする内容がありません。"
+  text_panel_config_saved: "パネル設定を保存しました"

@@ -51,4 +51,16 @@ en:
   text_panel_resize_blocked: "Cannot resize panel due to overlap"
   text_confirm_delete_panel: "Are you sure you want to delete this panel?"
   button_customize_end: "End Customize"
+  button_configure: "Configure"
+  button_save: "Save"
+  button_cancel: "Cancel"
   label_delete: "Delete"
+
+  # Text Panel Configuration
+  text_configure_text_panel: "Configure Text Panel"
+  text_tab_edit: "Edit"
+  text_tab_preview: "Preview"
+  text_placeholder: "Enter your text here... You can use Wiki formatting."
+  text_wiki_help: "Wiki formatting: **bold**, *italic*, [link], * list item"
+  text_preview_empty: "Nothing to preview yet."
+  text_panel_config_saved: "Panel configuration saved successfully"

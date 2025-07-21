@@ -1,0 +1,11 @@
+<div class="text-panel-content">
+  <% if panel.config['text_content'].present? %>
+    <%# Redmine's textilizable helper for proper Wiki formatting %>
+    <%= textilizable(panel.config['text_content']) %>
+  <% else %>
+    <div class="panel-placeholder">
+      <p><%= l(:text_panel_content_placeholder) %></p>
+      <small><%= l(:text_panel_config_required) %></small>
+    </div>
+  <% end %>
+</div>
