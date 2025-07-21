@@ -39,17 +39,6 @@ class DashboardCustomizer {
       addPanelBtn.addEventListener('click', () => this.startAddPanel());
     }
 
-    // レイアウト保存
-    const saveBtn = document.getElementById('save-layout-btn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', () => this.saveLayout());
-    }
-
-    // キャンセル
-    const cancelBtn = document.getElementById('cancel-customize-btn');
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', () => this.cancelCustomize());
-    }
 
     // グローバルマウスイベント
     document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
@@ -528,15 +517,6 @@ class DashboardCustomizer {
     document.removeEventListener('mousemove', this.handleAddPanelMouseMove);
   }
 
-  saveLayout() {
-    this.showMessage(this.translations.layoutSaved || 'Layout saved successfully', 'success');
-  }
-
-  cancelCustomize() {
-    if (confirm(this.translations.confirmDiscardChanges || 'Discard changes and exit customize mode?')) {
-      this.toggleCustomizeMode();
-    }
-  }
 
   getPanelTypeTitle(type) {
     const titles = {
