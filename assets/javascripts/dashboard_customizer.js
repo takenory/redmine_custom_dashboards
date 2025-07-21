@@ -613,14 +613,62 @@ class DashboardCustomizer {
           wikiToolbar.setHelpLink('/help/wiki_syntax');
         }
         if (wikiToolbar.setPreviewUrl) {
-          wikiToolbar.setPreviewUrl('/preview/text');
+          // CSRFトークンを含むプレビューURL
+          const previewUrl = '/preview/text?authenticity_token=' + encodeURIComponent(this.csrfToken);
+          wikiToolbar.setPreviewUrl(previewUrl);
         }
         wikiToolbar.draw();
+        
+        // プレビュー機能を手動で設定
+        this.setupPreviewFunctionality(wikiToolbar, textareaId);
+        
         console.log('Wiki toolbar initialized for', textareaId);
       } else {
         console.log('jsToolBar not available, using basic textarea');
       }
     }, 100);
+  }
+
+  setupPreviewFunctionality(wikiToolbar, textareaId) {
+    // プレビュータブを取得
+    const previewTab = wikiToolbar.tabsBlock.querySelector('.tab-preview');
+    if (previewTab) {
+      const self = this;
+      // 元のクリックイベントを保存
+      const originalOnClick = previewTab.onclick;
+      
+      // 新しいクリックイベントを設定
+      previewTab.onclick = function(event) {
+        event.preventDefault();
+        
+        // 元の表示切り替え処理を実行
+        if (originalOnClick) {
+          originalOnClick.call(this, event);
+        } else {
+          wikiToolbar.showPreview(event);
+        }
+        
+        // プレビューコンテンツを更新
+        const textarea = document.getElementById(textareaId);
+        const previewDiv = wikiToolbar.preview;
+        
+        if (textarea && previewDiv) {
+          const content = textarea.value.trim();
+          if (content) {
+            self.fetchRedminePreview(content).then(html => {
+              previewDiv.innerHTML = html;
+            }).catch(error => {
+              console.error('Preview failed:', error);
+              previewDiv.innerHTML = '<p>Preview not available</p>';
+            });
+          } else {
+            previewDiv.innerHTML = '<p>Nothing to preview</p>';
+          }
+        }
+        
+        return false;
+      };
+    }
   }
 
   fetchRedminePreview(text) {
