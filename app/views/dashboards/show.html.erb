@@ -45,14 +45,6 @@
     </button>
   </div>
   
-  <div class="toolbar-section">
-    <button id="save-layout-btn" class="icon icon-save" type="button">
-      <%= sprite_icon('save', l(:button_save_layout)) %>
-    </button>
-    <button id="cancel-customize-btn" class="icon icon-cancel" type="button">
-      <%= sprite_icon('cancel', l(:button_cancel)) %>
-    </button>
-  </div>
 </div>
 
 <!-- ダッシュボード本体 -->
@@ -112,9 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
       panelDeleteFailed: '<%= l(:text_panel_delete_failed) %>',
       panelMoveBlocked: '<%= l(:text_panel_move_blocked) %>',
       panelResizeBlocked: '<%= l(:text_panel_resize_blocked) %>',
-      layoutSaved: '<%= l(:text_layout_saved) %>',
       confirmDeletePanel: '<%= l(:text_confirm_delete_panel) %>',
-      confirmDiscardChanges: '<%= l(:text_confirm_discard_changes) %>',
       customizeEnd: '<%= l(:button_customize_end) %>',
       customize: '<%= l(:button_customize_dashboard) %>',
       deleteLabel: '<%= l(:label_delete) %>',
