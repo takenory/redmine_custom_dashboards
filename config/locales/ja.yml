@@ -64,3 +64,10 @@ ja:
   text_wiki_help: "Wikiフォーマット: **太字**, *斜体*, [リンク], * リスト項目"
   text_preview_empty: "プレビューする内容がありません。"
   text_panel_config_saved: "パネル設定を保存しました"
+
+  # Issues Panel Configuration
+  text_configure_issues_panel: "設定ボタンをクリックして、表示する課題を設定してください。"
+  label_query_selection: "クエリ選択"
+  label_columns_selection: "表示項目"
+  label_sort_criteria: "ソート条件"
+  text_issues_panel_help: "表示する課題とその表示方法を設定してください。"

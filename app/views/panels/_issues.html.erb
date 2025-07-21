@@ -1,0 +1,172 @@
+<%
+  # マイページの issuequery ブロックの実装を参考に、設定された条件でチケット一覧を表示
+  # パネルの設定を取得（リロードして最新データを確実に取得）
+  panel.reload if panel.respond_to?(:reload)
+  
+  panel_config = panel.config || {}
+  query_id = panel_config['query_id']
+  columns = panel_config['columns'] 
+  sort = panel_config['sort']
+  
+  # デバッグ情報（開発環境のみ）
+  if Rails.env.development?
+    Rails.logger.debug "Issues panel #{panel.id} panel_config field: #{panel.panel_config}"
+    Rails.logger.debug "Issues panel #{panel.id} config method: #{panel_config.inspect}"
+    Rails.logger.debug "Query ID: #{query_id}, Columns: #{columns}, Sort: #{sort}"
+  end
+  
+  query = nil
+  
+  # クエリIDが設定されている場合の処理
+  if query_id.present?
+    if query_id.is_a?(String) && !query_id.match(/^\d+$/)
+      # 特別なクエリタイプ（assigned_to_me など）の処理
+      case query_id
+      when 'assigned_to_me'
+        query = IssueQuery.new(:name => l(:label_assigned_to_me_issues), :user => User.current)
+        query.add_filter 'assigned_to_id', '=', ['me']
+        query.add_filter 'project.status', '=', [Project::STATUS_ACTIVE.to_s]
+      when 'reported_by_me'
+        query = IssueQuery.new(:name => l(:label_reported_issues), :user => User.current)
+        query.add_filter 'author_id', '=', ['me']
+        query.add_filter 'project.status', '=', [Project::STATUS_ACTIVE.to_s]
+      when 'updated_by_me'
+        query = IssueQuery.new(:name => l(:label_updated_issues), :user => User.current)
+        query.add_filter 'updated_by', '=', ['me']
+        query.add_filter 'project.status', '=', [Project::STATUS_ACTIVE.to_s]
+      when 'watched_by_me'
+        query = IssueQuery.new(:name => l(:label_watched_issues), :user => User.current)
+        query.add_filter 'watcher_id', '=', ['me']
+        query.add_filter 'project.status', '=', [Project::STATUS_ACTIVE.to_s]
+      end
+    else
+      # 数値のクエリIDの場合は既存のクエリを取得
+      query = IssueQuery.visible.find_by_id(query_id)
+    end
+    
+    if query
+      # 設定されたカラムとソート条件を適用
+      if columns.present? && columns.is_a?(Array) && !columns.empty?
+        query.column_names = columns
+      else
+        query.column_names = ['project', 'tracker', 'status', 'subject']
+      end
+      
+      if sort.present? && sort.is_a?(Array) && !sort.empty?
+        # ソート条件を適切な形式に変換
+        sort_criteria = sort.map do |s|
+          if s.is_a?(Array) && s.length == 2
+            [s[0].to_s, s[1].to_s]
+          else
+            nil
+          end
+        end.compact
+        query.sort_criteria = sort_criteria if sort_criteria.any?
+      else
+        query.sort_criteria = [['priority', 'desc'], ['updated_on', 'desc']]
+      end
+      
+      if Rails.env.development?
+        Rails.logger.debug "Final query columns: #{query.column_names.inspect}"
+        Rails.logger.debug "Final query sort: #{query.sort_criteria.inspect}"
+      end
+      
+      # チケットを取得（最大10件）
+      issues = query.issues(:limit => 10)
+      
+      if Rails.env.development?
+        Rails.logger.debug "Found #{issues.size} issues"
+      end
+      
+      # MyHelper の render_issuequery_block と同じ方式で表示
+      block_id = "panel_#{panel.id}"
+%>
+
+<h3>
+  <%= "#{query.project} |" if query.project %>
+  <%= link_to query.name, _project_issues_path(query.project, query.as_params) %>
+  (<%= query.issue_count %>)
+</h3>
+
+<% if issues.any? %>
+  <div class="issues-panel-content">
+    <table class="list issues">
+      <thead>
+        <tr>
+          <% query.inline_columns.each do |column| %>
+            <th class="<%= column.css_classes %>">
+              <%= column.caption %>
+            </th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% issues.each do |issue| %>
+          <tr id="issue-<%= issue.id %>" class="<%= issue.css_classes %>">
+            <% query.inline_columns.each do |column| %>
+              <td class="<%= column.css_classes %>">
+                <% if column.name == :subject %>
+                  <%= link_to issue.subject, issue_path(issue), :title => issue.subject %>
+                <% elsif column.name == :id %>
+                  <%= link_to issue.id, issue_path(issue) %>
+                <% elsif column.name == :project %>
+                  <%= issue.project %>
+                <% elsif column.name == :status %>
+                  <span class="status-<%= issue.status.id %>"><%= issue.status %></span>
+                <% elsif column.name == :priority %>
+                  <span class="priority-<%= issue.priority.id %>"><%= issue.priority %></span>
+                <% elsif column.name == :assigned_to %>
+                  <%= issue.assigned_to %>
+                <% elsif column.name == :author %>
+                  <%= issue.author %>
+                <% elsif column.name == :created_on %>
+                  <%= format_date(issue.created_on) %>
+                <% elsif column.name == :updated_on %>
+                  <%= format_date(issue.updated_on) %>
+                <% elsif column.name == :due_date %>
+                  <%= format_date(issue.due_date) if issue.due_date %>
+                <% elsif column.name == :done_ratio %>
+                  <%= issue.done_ratio %>%
+                <% elsif column.name == :tracker %>
+                  <%= issue.tracker %>
+                <% else %>
+                  <% begin %>
+                    <%= column_content(column, issue) %>
+                  <% rescue => e %>
+                    <%= issue.try(column.name) || "-" %>
+                  <% end %>
+                <% end %>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+
+<% content_for :header_tags do %>
+  <%= auto_discovery_link_tag(:atom,
+                              _project_issues_path(query.project, query.as_params.merge(:format => 'atom', :key => User.current.atom_key)),
+                              {:title => query.name}) %>
+<% end %>
+
+<%
+    else
+      # クエリが見つからない場合は選択画面を表示
+      queries = IssueQuery.visible.sorted
+%>
+  <h3><%= l(:label_issue_plural) %></h3>
+  <p><%= l(:text_configure_issues_panel) %></p>
+<%
+    end
+  else
+    # クエリが設定されていない場合
+%>
+  <h3><%= l(:label_issue_plural) %></h3>
+  <p><%= l(:text_configure_issues_panel) %></p>
+<%
+  end
+%>

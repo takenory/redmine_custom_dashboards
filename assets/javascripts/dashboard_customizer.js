@@ -24,6 +24,21 @@ class DashboardCustomizer {
   init() {
     this.bindEvents();
     this.setupGrid();
+    this.restoreCustomizeModeState();
+  }
+
+  restoreCustomizeModeState() {
+    // セッションストレージからカスタマイズモード状態を復元
+    const wasCustomizeMode = sessionStorage.getItem('dashboardCustomizeMode');
+    if (wasCustomizeMode === 'true') {
+      sessionStorage.removeItem('dashboardCustomizeMode');
+      // DOM読み込み完了後にカスタマイズモードを復元
+      setTimeout(() => {
+        if (!this.isCustomizeMode) {
+          this.toggleCustomizeMode();
+        }
+      }, 100);
+    }
   }
 
   bindEvents() {
@@ -540,6 +555,8 @@ class DashboardCustomizer {
     // パネルタイプ固有の設定を追加
     if (panelType === 'text') {
       content += this.createTextPanelSpecificContent(panel);
+    } else if (panelType === 'issues') {
+      content += this.createIssuesPanelSpecificContent(panel);
     } else {
       content += `
         <div class="type-specific-config-section">
@@ -572,6 +589,41 @@ class DashboardCustomizer {
         </p>
         <p class="formatting-help">
           <small>You can use Wiki formatting: *bold*, _italic_, [[links]], etc.</small>
+        </p>
+      </div>
+    `;
+  }
+
+  createIssuesPanelSpecificContent(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    const currentConfig = this.getCurrentPanelConfig(panel);
+    
+    return `
+      <div class="type-specific-config-section">
+        <p>
+          <label for="panel_query_id_${panelId}">Query</label>
+          <select id="panel_query_id_${panelId}" name="panel[query_id]" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="">Loading queries...</option>
+          </select>
+        </p>
+        <div id="query_columns_${panelId}" style="display: none;">
+          <p>
+            <label>Columns</label>
+            <div id="columns_selection_${panelId}" class="columns-selection">
+              <!-- Columns will be loaded dynamically -->
+            </div>
+          </p>
+        </div>
+        <div id="query_sort_${panelId}" style="display: none;">
+          <p>
+            <label>Sort</label>
+            <div id="sort_selection_${panelId}" class="sort-selection">
+              <!-- Sort criteria will be loaded dynamically -->
+            </div>
+          </p>
+        </div>
+        <p class="info-message">
+          <small>Configure which issues to display and how they should be presented.</small>
         </p>
       </div>
     `;
@@ -623,6 +675,17 @@ class DashboardCustomizer {
     return ''; // デフォルトは空
   }
 
+  getCurrentPanelConfig(panel) {
+    if (panel.dataset.panelConfig) {
+      try {
+        return JSON.parse(panel.dataset.panelConfig);
+      } catch (e) {
+        console.warn('Failed to parse panel config:', e);
+      }
+    }
+    return {};
+  }
+
   htmlToPlainText(html) {
     // HTMLタグを除去してプレーンテキストに変換
     let text = html;
@@ -662,8 +725,16 @@ class DashboardCustomizer {
     const saveBtn = modal.querySelector('#save-panel-config');
     saveBtn.addEventListener('click', () => this.savePanelConfiguration(panel));
 
-    // Wikiツールバーを初期化
-    this.initializeWikiToolbar(panel);
+    const panelType = this.getPanelType(panel);
+    
+    // パネルタイプ固有の初期化
+    if (panelType === 'text') {
+      // Wikiツールバーを初期化
+      this.initializeWikiToolbar(panel);
+    } else if (panelType === 'issues') {
+      // Issues panel specific initialization
+      this.initializeIssuesPanelConfiguration(panel);
+    }
   }
 
   initializeWikiToolbar(panel) {
@@ -779,6 +850,186 @@ class DashboardCustomizer {
     }
   }
 
+  initializeIssuesPanelConfiguration(panel) {
+    const panelId = panel.getAttribute('data-panel-id');
+    const currentConfig = this.getCurrentPanelConfig(panel);
+    
+    // Load available queries
+    this.loadQueries(panelId, currentConfig.query_id);
+  }
+
+  loadQueries(panelId, selectedQueryId) {
+    const querySelect = document.getElementById(`panel_query_id_${panelId}`);
+    if (querySelect) {
+      // 利用可能なクエリを読み込む
+      this.fetchAvailableQueries().then(queries => {
+        let options = '<option value="">Select a query...</option>';
+        queries.forEach(query => {
+          const selected = selectedQueryId == query.id ? 'selected' : '';
+          options += `<option value="${query.id}" ${selected}>${this.escapeHtml(query.name)}</option>`;
+        });
+        querySelect.innerHTML = options;
+        
+        // Add change event listener
+        querySelect.addEventListener('change', () => {
+          this.onQuerySelectionChange(panelId, querySelect.value);
+        });
+        
+        // If there's a selected query, show columns and sort options
+        if (selectedQueryId) {
+          this.onQuerySelectionChange(panelId, selectedQueryId);
+        }
+      }).catch(error => {
+        console.error('Failed to load queries:', error);
+        // フォールバック: 基本的なクエリリスト
+        querySelect.innerHTML = `
+          <option value="">Select a query...</option>
+          <option value="assigned_to_me" ${selectedQueryId == 'assigned_to_me' ? 'selected' : ''}>Assigned to me</option>
+          <option value="reported_by_me" ${selectedQueryId == 'reported_by_me' ? 'selected' : ''}>Reported by me</option>
+          <option value="updated_by_me" ${selectedQueryId == 'updated_by_me' ? 'selected' : ''}>Updated by me</option>
+          <option value="watched_by_me" ${selectedQueryId == 'watched_by_me' ? 'selected' : ''}>Watched by me</option>
+        `;
+        
+        querySelect.addEventListener('change', () => {
+          this.onQuerySelectionChange(panelId, querySelect.value);
+        });
+        
+        if (selectedQueryId) {
+          this.onQuerySelectionChange(panelId, selectedQueryId);
+        }
+      });
+    }
+  }
+
+  fetchAvailableQueries() {
+    // Redmineのクエリ一覧を取得（簡易版）
+    // 本格的な実装では /queries.json などのエンドポイントを使用
+    return fetch('/queries.json', {
+      headers: {
+        'X-CSRF-Token': this.csrfToken,
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch queries');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // クエリデータの構造に応じて調整
+      if (data.queries) {
+        return data.queries;
+      } else if (Array.isArray(data)) {
+        return data;
+      } else {
+        throw new Error('Unexpected response format');
+      }
+    })
+    .catch(error => {
+      console.warn('Query API not available, using fallback queries');
+      // フォールバック: マイページでよく使用される基本クエリ
+      return [
+        { id: 'assigned_to_me', name: 'Assigned to me' },
+        { id: 'reported_by_me', name: 'Reported by me' }, 
+        { id: 'updated_by_me', name: 'Updated by me' },
+        { id: 'watched_by_me', name: 'Watched by me' }
+      ];
+    });
+  }
+
+  onQuerySelectionChange(panelId, queryId) {
+    const columnsDiv = document.getElementById(`query_columns_${panelId}`);
+    const sortDiv = document.getElementById(`query_sort_${panelId}`);
+    
+    if (queryId) {
+      // Show columns and sort sections
+      if (columnsDiv) columnsDiv.style.display = 'block';
+      if (sortDiv) sortDiv.style.display = 'block';
+      
+      // Load default columns and sort options
+      this.loadQueryColumns(panelId, queryId);
+      this.loadQuerySort(panelId, queryId);
+    } else {
+      // Hide columns and sort sections
+      if (columnsDiv) columnsDiv.style.display = 'none';
+      if (sortDiv) sortDiv.style.display = 'none';
+    }
+  }
+
+  loadQueryColumns(panelId, queryId) {
+    const columnsContainer = document.getElementById(`columns_selection_${panelId}`);
+    const currentConfig = this.getCurrentPanelConfig(document.querySelector(`[data-panel-id="${panelId}"]`));
+    const selectedColumns = currentConfig.columns || ['project', 'tracker', 'status', 'subject'];
+    
+    if (columnsContainer) {
+      const availableColumns = [
+        'project', 'tracker', 'status', 'priority', 'subject', 'assigned_to', 
+        'author', 'created_on', 'updated_on', 'due_date', 'done_ratio'
+      ];
+      
+      columnsContainer.innerHTML = availableColumns.map(column => `
+        <label style="display: inline-block; width: 150px; margin-right: 10px;">
+          <input type="checkbox" name="panel[columns][]" value="${column}" 
+                 ${selectedColumns.includes(column) ? 'checked' : ''}>
+          ${this.formatColumnName(column)}
+        </label>
+      `).join('');
+    }
+  }
+
+  loadQuerySort(panelId, queryId) {
+    const sortContainer = document.getElementById(`sort_selection_${panelId}`);
+    const currentConfig = this.getCurrentPanelConfig(document.querySelector(`[data-panel-id="${panelId}"]`));
+    const selectedSort = currentConfig.sort || [['priority', 'desc'], ['updated_on', 'desc']];
+    
+    if (sortContainer) {
+      const availableSortFields = [
+        'priority', 'status', 'updated_on', 'created_on', 'due_date', 'project', 'tracker', 'subject'
+      ];
+      
+      let sortHtml = '';
+      for (let i = 0; i < 3; i++) {
+        const currentSortField = selectedSort[i] ? selectedSort[i][0] : '';
+        const currentSortDir = selectedSort[i] ? selectedSort[i][1] : 'asc';
+        
+        sortHtml += `
+          <div style="margin-bottom: 8px;">
+            <select name="panel[sort_field_${i}]" style="width: 150px; margin-right: 8px;">
+              <option value="">None</option>
+              ${availableSortFields.map(field => 
+                `<option value="${field}" ${field === currentSortField ? 'selected' : ''}>${this.formatColumnName(field)}</option>`
+              ).join('')}
+            </select>
+            <select name="panel[sort_dir_${i}]" style="width: 100px;">
+              <option value="asc" ${currentSortDir === 'asc' ? 'selected' : ''}>Ascending</option>
+              <option value="desc" ${currentSortDir === 'desc' ? 'selected' : ''}>Descending</option>
+            </select>
+          </div>
+        `;
+      }
+      
+      sortContainer.innerHTML = sortHtml;
+    }
+  }
+
+  formatColumnName(column) {
+    const names = {
+      'project': 'Project',
+      'tracker': 'Tracker',
+      'status': 'Status',
+      'priority': 'Priority',
+      'subject': 'Subject',
+      'assigned_to': 'Assignee',
+      'author': 'Author',
+      'created_on': 'Created',
+      'updated_on': 'Updated',
+      'due_date': 'Due date',
+      'done_ratio': 'Progress'
+    };
+    return names[column] || column.charAt(0).toUpperCase() + column.slice(1);
+  }
+
   updatePreview() {
     const textarea = document.getElementById('panel-text-content');
     const preview = document.getElementById('panel-text-preview');
@@ -822,6 +1073,10 @@ class DashboardCustomizer {
     const panelId = panel.getAttribute('data-panel-id');
     const panelType = this.getPanelType(panel);
     
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log('Saving configuration for panel:', panelId, 'type:', panelType);
+    }
+    
     // タイトルを取得
     const titleInput = document.getElementById(`panel_title_${panelId}`);
     const newTitle = titleInput ? titleInput.value.trim() : '';
@@ -834,12 +1089,52 @@ class DashboardCustomizer {
     // パネル設定データを収集
     const configData = {};
     
-    // テキストパネルの場合、テキストコンテンツも取得
+    // パネルタイプ固有の設定データを収集
     if (panelType === 'text') {
       const textareaId = `panel_text_content_${panelId}`;
       const textarea = document.getElementById(textareaId);
       if (textarea) {
         configData.text_content = textarea.value;
+      }
+    } else if (panelType === 'issues') {
+      // Issues panel configuration
+      const querySelect = document.getElementById(`panel_query_id_${panelId}`);
+      if (querySelect) {
+        configData.query_id = querySelect.value;
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.log('Selected query ID:', configData.query_id);
+        }
+      }
+      
+      // Collect columns
+      const columnCheckboxes = document.querySelectorAll(`input[name="panel[columns][]"]`);
+      const selectedColumns = [];
+      columnCheckboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+          selectedColumns.push(checkbox.value);
+        }
+      });
+      configData.columns = selectedColumns;
+      
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Selected columns:', selectedColumns);
+      }
+      
+      // Collect sort criteria
+      const sortCriteria = [];
+      for (let i = 0; i < 3; i++) {
+        const fieldSelect = document.querySelector(`select[name="panel[sort_field_${i}]"]`);
+        const dirSelect = document.querySelector(`select[name="panel[sort_dir_${i}]"]`);
+        
+        if (fieldSelect && dirSelect && fieldSelect.value) {
+          sortCriteria.push([fieldSelect.value, dirSelect.value]);
+        }
+      }
+      configData.sort = sortCriteria;
+      
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Sort criteria:', sortCriteria);
+        console.log('Final issues config data:', configData);
       }
     }
     
@@ -847,8 +1142,34 @@ class DashboardCustomizer {
     this.updatePanelTitleAndConfig(panelId, newTitle, configData).then(() => {
       // パネル表示を更新
       this.updatePanelTitleDisplay(panel, newTitle);
-      this.updatePanelDisplay(panel, configData);
       this.closeConfigurationModal();
+      
+      // Issues パネルの場合は保存完了後に部分更新を試行
+      if (panelType === 'issues' && configData.query_id) {
+        // カスタマイズモードの状態を保存
+        const wasCustomizeMode = this.isCustomizeMode;
+        
+        // AJAXでパネル内容を更新試行
+        this.refreshIssuesPanelContent(panel, configData).then(() => {
+          // 成功した場合はカスタマイズモードを維持
+          if (wasCustomizeMode && !this.isCustomizeMode) {
+            this.toggleCustomizeMode();
+          }
+        }).catch(() => {
+          // 失敗した場合はページリロード（カスタマイズモード状態を保存）
+          if (wasCustomizeMode) {
+            sessionStorage.setItem('dashboardCustomizeMode', 'true');
+          }
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        });
+      } else {
+        this.updatePanelDisplay(panel, configData);
+      }
+    }).catch(error => {
+      console.error('Failed to save panel configuration:', error);
+      this.showMessage('Failed to save configuration', 'error');
     });
   }
 
@@ -857,15 +1178,26 @@ class DashboardCustomizer {
       title: title,
       panel_config: JSON.stringify(configData)
     };
+    
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log('Sending panel data to server:', panelData);
+    }
 
     return this.apiCall('PATCH', this.urls.updatePanel, { panel: panelData, panel_id: panelId })
       .then(response => {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.log('Server response:', response);
+        }
         if (response.status === 'success') {
           this.showMessage(this.translations.panelConfigSaved || 'Panel configuration saved', 'success');
         } else {
           this.showMessage(response.errors ? response.errors.join(', ') : 'Failed to save configuration', 'error');
           throw new Error('Save failed');
         }
+      })
+      .catch(error => {
+        console.error('API call failed:', error);
+        throw error;
       });
   }
 
@@ -892,14 +1224,57 @@ class DashboardCustomizer {
     }
   }
 
-  updatePanelDisplay(panel, configData) {
+  refreshIssuesPanelContent(panel, configData) {
+    const panelId = panel.getAttribute('data-panel-id');
     const content = panel.querySelector('.panel-content');
+    
+    // ローディング表示
+    content.innerHTML = '<div class="panel-loading">Loading issues...</div>';
     
     // パネルのdata-panel-configを更新
     panel.dataset.panelConfig = JSON.stringify(configData);
     
-    if (content && configData.text_content) {
-      // Redmineのプレビューエンドポイントを使用してフォーマットされたHTMLを取得
+    // パネルの再描画をリクエスト（同期リクエスト）
+    return fetch(window.location.href, {
+      method: 'GET',
+      headers: {
+        'X-CSRF-Token': this.csrfToken,
+        'Accept': 'text/html'
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        return response.text();
+      } else {
+        throw new Error('Failed to refresh panel');
+      }
+    })
+    .then(html => {
+      // レスポンスから該当パネルの内容を抽出
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const updatedPanel = tempDiv.querySelector(`[data-panel-id="${panelId}"] .panel-content`);
+      
+      if (updatedPanel) {
+        content.innerHTML = updatedPanel.innerHTML;
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.log('Issues panel updated successfully');
+        }
+      } else {
+        throw new Error('Panel content not found in response');
+      }
+    });
+  }
+
+  updatePanelDisplay(panel, configData) {
+    const content = panel.querySelector('.panel-content');
+    const panelType = this.getPanelType(panel);
+    
+    // パネルのdata-panel-configを更新
+    panel.dataset.panelConfig = JSON.stringify(configData);
+    
+    if (panelType === 'text' && content && configData.text_content) {
+      // テキストパネルの場合
       this.fetchRedminePreview(configData.text_content).then(html => {
         content.innerHTML = `<div class="text-panel-content">${html}</div>`;
       }).catch(error => {
@@ -909,7 +1284,7 @@ class DashboardCustomizer {
         content.innerHTML = `<div class="text-panel-content">${fallbackHtml}</div>`;
       });
     } else if (content) {
-      // コンテンツが空の場合はプレースホルダーを表示
+      // その他のパネルタイプまたはコンテンツが空の場合はプレースホルダーを表示
       content.innerHTML = `
         <div class="panel-placeholder">
           <p>${this.translations.panelContentPlaceholder || 'No content configured yet.'}</p>
