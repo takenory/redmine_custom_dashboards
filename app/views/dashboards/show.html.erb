@@ -2,6 +2,8 @@
   <%= stylesheet_link_tag 'dashboards', plugin: 'redmine_custom_dashboards' %>
   <%= stylesheet_link_tag 'dashboard_panels', plugin: 'redmine_custom_dashboards' %>
   <%= javascript_include_tag 'dashboard_customizer', plugin: 'redmine_custom_dashboards' %>
+  <%= heads_for_wiki_formatter %>
+  <%= stylesheet_link_tag 'jstoolbar' %>
 <% end %>
 
 <div class="contextual">
@@ -61,11 +63,14 @@
            data-grid-y="<%= panel.grid_y %>"
            data-grid-width="<%= panel.grid_width %>"
            data-grid-height="<%= panel.grid_height %>"
+           data-panel-config="<%= h(panel.config.to_json) %>"
+           data-panel-type="<%= panel.panel_type %>"
            style="left: <%= panel.pixel_x %>px; top: <%= panel.pixel_y %>px; width: <%= panel.pixel_width %>px; height: <%= panel.pixel_height %>px; z-index: <%= panel.z_index %>;">
 
         <div class="panel-header">
           <span class="panel-title"><%= h(panel.title) %></span>
           <div class="panel-controls">
+            <a href="#" class="panel-configure" data-panel-id="<%= panel.id %>" title="<%= l(:button_configure) %>"><%= sprite_icon('settings') %></a>
             <a href="#" class="panel-delete" data-panel-id="<%= panel.id %>" title="<%= l(:button_delete) %>"><%= sprite_icon('close') %></a>
           </div>
         </div>
@@ -107,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
       confirmDeletePanel: '<%= l(:text_confirm_delete_panel) %>',
       customizeEnd: '<%= l(:button_customize_end) %>',
       customize: '<%= l(:button_customize_dashboard) %>',
+      configureLabel: '<%= l(:button_configure) %>',
       deleteLabel: '<%= l(:label_delete) %>',
       panelTypeText: '<%= l(:label_panel_text) %>',
       panelTypeChart: '<%= l(:label_panel_chart) %>',
@@ -118,7 +124,17 @@ document.addEventListener('DOMContentLoaded', function() {
       panelTypeFallback: '<%= l(:label_panel_type) %>',
       panelContentPlaceholder: '<%= l(:text_panel_content_placeholder) %>',
       panelConfigRequired: '<%= l(:text_panel_config_required) %>',
-      deleteIconSvg: '<%= sprite_icon('close').html_safe %>'
+      configureIconSvg: '<%= sprite_icon('settings').html_safe %>',
+      deleteIconSvg: '<%= sprite_icon('close').html_safe %>',
+      configureTextPanel: '<%= l(:text_configure_text_panel) %>',
+      buttonSave: '<%= l(:button_save) %>',
+      buttonCancel: '<%= l(:button_cancel) %>',
+      tabEdit: '<%= l(:text_tab_edit) %>',
+      tabPreview: '<%= l(:text_tab_preview) %>',
+      textPlaceholder: '<%= l(:text_placeholder) %>',
+      wikiHelpText: '<%= l(:text_wiki_help) %>',
+      previewEmpty: '<%= l(:text_preview_empty) %>',
+      panelConfigSaved: '<%= l(:text_panel_config_saved) %>'
     }
   });
 });
