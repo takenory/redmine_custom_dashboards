@@ -206,7 +206,10 @@ class DashboardsControllerTest < Redmine::ControllerTest
   def test_show_default_with_default_dashboard_should_show_dashboard
     get :show_default
     assert_response :success
-    assert_select 'h2', text: /#{@dashboard.name}/
+    
+    # Should display "Dashboard（Name）" format for default dashboard
+    expected_title = "#{I18n.t(:label_dashboard)}（#{@dashboard.name}）"
+    assert_select 'h2', text: expected_title
   end
 
   def test_show_default_without_default_dashboard_should_redirect_to_index
@@ -221,6 +224,36 @@ class DashboardsControllerTest < Redmine::ControllerTest
     get :show, params: { id: @dashboard.id }
     assert_response :success
     assert_select 'h2', text: /#{@dashboard.name}/
+  end
+
+  def test_show_should_display_default_dashboard_with_proper_title_format
+    # Ensure dashboard is default
+    @dashboard.update!(is_default: true)
+    
+    get :show, params: { id: @dashboard.id }
+    assert_response :success
+    
+    # Should display "Dashboard（Name）" format for default dashboard
+    expected_title = "#{I18n.t(:label_dashboard)}（#{@dashboard.name}）"
+    assert_select 'h2', text: expected_title
+  end
+
+  def test_show_should_display_non_default_dashboard_with_name_only
+    # Ensure dashboard is not default
+    @dashboard.update!(is_default: false)
+    
+    get :show, params: { id: @dashboard.id }
+    assert_response :success
+    
+    # Should display only the dashboard name for non-default dashboard
+    assert_select 'h2', text: @dashboard.name
+    # Should NOT contain the "Dashboard（" prefix pattern
+    dashboard_prefix = "#{I18n.t(:label_dashboard)}（"
+    assert_select 'h2' do |elements|
+      elements.each do |element|
+        assert_not element.text.include?(dashboard_prefix), "Dashboard title should not contain '#{dashboard_prefix}' for non-default dashboard"
+      end
+    end
   end
 
   private
