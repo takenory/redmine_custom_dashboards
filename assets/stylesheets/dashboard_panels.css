@@ -115,27 +115,12 @@
 }
 
 .panel-controls {
-  display: flex;
+  display: none;
   gap: 4px;
 }
 
 .panel-delete {
-  background: #d9534f;
-  color: white;
-  border: none;
-  border-radius: 2px;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  font-size: 12px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.panel-delete:hover {
-  background: #c9302c;
+  text-decoration: none;
 }
 
 /* Panel Content */

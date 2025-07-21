@@ -65,8 +65,8 @@
         
         <div class="panel-header">
           <span class="panel-title"><%= h(panel.title) %></span>
-          <div class="panel-controls" style="display: none;">
-            <button class="panel-delete" data-panel-id="<%= panel.id %>" title="<%= l(:button_delete) %>">×</button>
+          <div class="panel-controls">
+            <a href="#" class="panel-delete" data-panel-id="<%= panel.id %>" title="<%= l(:button_delete) %>"><%= sprite_icon('close') %></a>
           </div>
         </div>
         
@@ -75,7 +75,7 @@
         </div>
         
         <!-- リサイズハンドル -->
-        <div class="resize-handle resize-se" style="display: none;"></div>
+        <div class="resize-handle resize-se"></div>
       </div>
     <% end %>
     
@@ -117,7 +117,8 @@ document.addEventListener('DOMContentLoaded', function() {
       panelTypeCustom: '<%= l(:label_panel_custom) %>',
       panelTypeFallback: '<%= l(:label_panel_type) %>',
       panelContentPlaceholder: '<%= l(:text_panel_content_placeholder) %>',
-      panelConfigRequired: '<%= l(:text_panel_config_required) %>'
+      panelConfigRequired: '<%= l(:text_panel_config_required) %>',
+      deleteIconSvg: '<%= sprite_icon('close').html_safe %>'
     }
   });
 });
