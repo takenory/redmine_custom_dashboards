@@ -101,7 +101,34 @@ document.addEventListener('DOMContentLoaded', function() {
     addPanelUrl: '<%= add_panel_dashboard_path(@dashboard) %>',
     updatePanelUrl: '<%= update_panel_dashboard_path(@dashboard) %>',
     deletePanelUrl: '<%= delete_panel_dashboard_path(@dashboard) %>',
-    updatePositionsUrl: '<%= update_panels_positions_dashboard_path(@dashboard) %>'
+    updatePositionsUrl: '<%= update_panels_positions_dashboard_path(@dashboard) %>',
+    translations: {
+      customizeModeStarted: '<%= l(:text_customize_mode_started) %>',
+      customizeModeEnded: '<%= l(:text_customize_mode_ended) %>',
+      clickToPlacePanel: '<%= l(:text_click_to_place_panel) %>',
+      panelAddFailed: '<%= l(:text_panel_add_failed) %>',
+      panelUpdated: '<%= l(:text_panel_updated) %>',
+      panelUpdateFailed: '<%= l(:text_panel_update_failed) %>',
+      panelDeleteFailed: '<%= l(:text_panel_delete_failed) %>',
+      panelMoveBlocked: '<%= l(:text_panel_move_blocked) %>',
+      panelResizeBlocked: '<%= l(:text_panel_resize_blocked) %>',
+      layoutSaved: '<%= l(:text_layout_saved) %>',
+      confirmDeletePanel: '<%= l(:text_confirm_delete_panel) %>',
+      confirmDiscardChanges: '<%= l(:text_confirm_discard_changes) %>',
+      customizeEnd: '<%= l(:button_customize_end) %>',
+      customize: '<%= l(:button_customize_dashboard) %>',
+      deleteLabel: '<%= l(:label_delete) %>',
+      panelTypeText: '<%= l(:label_panel_text) %>',
+      panelTypeChart: '<%= l(:label_panel_chart) %>',
+      panelTypeList: '<%= l(:label_panel_list) %>',
+      panelTypeCalendar: '<%= l(:label_panel_calendar) %>',
+      panelTypeIssues: '<%= l(:label_panel_issues) %>',
+      panelTypeActivity: '<%= l(:label_panel_activity) %>',
+      panelTypeCustom: '<%= l(:label_panel_custom) %>',
+      panelTypeFallback: '<%= l(:label_panel_type) %>',
+      panelContentPlaceholder: '<%= l(:text_panel_content_placeholder) %>',
+      panelConfigRequired: '<%= l(:text_panel_config_required) %>'
+    }
   });
 });
 </script>
