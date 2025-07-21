@@ -216,12 +216,12 @@
   .dashboard-grid {
     min-height: 600px;
   }
-  
+
   .customize-toolbar {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .toolbar-section {
     width: 100%;
     justify-content: space-between;

@@ -23,7 +23,7 @@ ja:
   text_dashboard_widgets_placeholder: "ダッシュボードウィジェットがここに表示されます。"
   text_dashboard_customize_hint: "編集ボタンからダッシュボードをカスタマイズできます。"
   text_no_dashboard_widgets: "このダッシュボードにはまだウィジェットが設定されていません。"
-  
+
   # パネルカスタマイズ
   button_customize_dashboard: "カスタマイズ"
   label_add_panel: "パネル追加"
@@ -38,7 +38,7 @@ ja:
   label_panel_type: "パネルタイプ"
   text_panel_content_placeholder: "パネルコンテンツのプレースホルダー"
   text_panel_config_required: "設定が必要です"
-  
+
   # JavaScript messages
   text_customize_mode_started: "カスタマイズモードを開始しました"
   text_customize_mode_ended: "カスタマイズモードを終了しました"

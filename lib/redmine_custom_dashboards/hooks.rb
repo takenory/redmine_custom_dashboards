@@ -8,7 +8,7 @@ module RedmineCustomDashboards
         })
       end
     end
-    
+
     def view_my_account_contextual(context = {})
       context[:controller].send(:render_to_string, {
         partial: 'dashboards/my_account_link',

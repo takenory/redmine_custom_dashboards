@@ -23,7 +23,7 @@ en:
   text_dashboard_widgets_placeholder: "Dashboard widgets will be displayed here."
   text_dashboard_customize_hint: "You can customize this dashboard using the edit button."
   text_no_dashboard_widgets: "No widgets have been configured for this dashboard yet."
-  
+
   # Panel Customization
   button_customize_dashboard: "Customize"
   label_add_panel: "Add Panel"
@@ -38,7 +38,7 @@ en:
   label_panel_type: "Panel Type"
   text_panel_content_placeholder: "Panel content placeholder"
   text_panel_config_required: "Configuration required"
-  
+
   # JavaScript messages
   text_customize_mode_started: "Customize mode started"
   text_customize_mode_ended: "Customize mode ended"

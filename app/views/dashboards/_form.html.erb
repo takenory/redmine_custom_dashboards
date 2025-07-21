@@ -5,12 +5,12 @@
     <%= f.label :name, l(:label_dashboard_name) %>
     <%= f.text_field :name, required: true, size: 50 %>
   </p>
-  
+
   <p>
     <%= f.label :description, l(:label_dashboard_description) %>
     <%= f.text_area :description, rows: 3, cols: 60 %>
   </p>
-  
+
   <p>
     <%= f.check_box :is_default %>
     <%= f.label :is_default, l(:label_dashboard_set_default) %>

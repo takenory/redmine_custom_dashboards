@@ -2,7 +2,7 @@ class DashboardsController < ApplicationController
   before_action :require_login
   before_action :find_dashboard, only: [:show, :edit, :update, :destroy, :set_default, :add_panel, :update_panel, :delete_panel, :update_panels_positions]
   before_action :authorize_dashboard_access, only: [:show, :edit, :update, :destroy, :set_default, :add_panel, :update_panel, :delete_panel, :update_panels_positions]
-  
+
   def show_default
     @default_dashboard = User.current.default_dashboard
     if @default_dashboard
@@ -12,23 +12,23 @@ class DashboardsController < ApplicationController
       redirect_to action: :index
     end
   end
-  
+
   def show
     # ダッシュボードの詳細表示
   end
-  
+
   def index
     @dashboards = User.current.dashboards.order(:name)
     @default_dashboard = User.current.default_dashboard
   end
-  
+
   def new
     @dashboard = User.current.dashboards.build
   end
-  
+
   def create
     @dashboard = User.current.dashboards.build(dashboard_params)
-    
+
     if @dashboard.save
       flash[:notice] = l(:notice_dashboard_created)
       redirect_to my_dashboards_path
@@ -36,10 +36,10 @@ class DashboardsController < ApplicationController
       render :new
     end
   end
-  
+
   def edit
   end
-  
+
   def update
     if @dashboard.update(dashboard_params)
       flash[:notice] = l(:notice_dashboard_updated)
@@ -48,13 +48,13 @@ class DashboardsController < ApplicationController
       render :edit
     end
   end
-  
+
   def destroy
     @dashboard.destroy
     flash[:notice] = l(:notice_dashboard_deleted)
     redirect_to my_dashboards_path
   end
-  
+
   def set_default
     @dashboard.set_as_default!
     flash[:notice] = l(:notice_dashboard_set_default)
@@ -63,7 +63,7 @@ class DashboardsController < ApplicationController
 
   def add_panel
     @panel = @dashboard.dashboard_panels.build(panel_params)
-    
+
     if @panel.save
       render json: { 
         status: 'success', 
@@ -80,7 +80,7 @@ class DashboardsController < ApplicationController
 
   def update_panel
     @panel = @dashboard.dashboard_panels.find(params[:panel_id])
-    
+
     if @panel.update(panel_params)
       render json: { 
         status: 'success', 
@@ -97,7 +97,7 @@ class DashboardsController < ApplicationController
 
   def delete_panel
     @panel = @dashboard.dashboard_panels.find(params[:panel_id])
-    
+
     if @panel.destroy
       render json: { 
         status: 'success', 
@@ -134,19 +134,19 @@ class DashboardsController < ApplicationController
       message: e.message 
     }, status: :unprocessable_entity
   end
-  
+
   private
-  
+
   def find_dashboard
     @dashboard = Dashboard.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render_404
   end
-  
+
   def authorize_dashboard_access
     render_403 unless @dashboard.user == User.current
   end
-  
+
   def dashboard_params
     params.require(:dashboard).permit(:name, :description, :is_default)
   end

@@ -63,7 +63,7 @@ class DashboardPanel < ActiveRecord::Base
 
   def config
     return {} if panel_config.blank?
-    
+
     JSON.parse(panel_config)
   rescue JSON::ParserError
     {}

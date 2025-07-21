@@ -48,10 +48,10 @@ class DashboardsControllerTest < Redmine::ControllerTest
         }
       }
     end
-    
+
     assert_redirected_to my_dashboards_path
     assert flash[:notice].include?(I18n.t(:notice_dashboard_created))
-    
+
     dashboard = Dashboard.last
     assert_equal 'New Dashboard', dashboard.name
     assert_equal @user, dashboard.user
@@ -66,7 +66,7 @@ class DashboardsControllerTest < Redmine::ControllerTest
         }
       }
     end
-    
+
     assert_response :success
     assert_select '#errorExplanation'
   end
@@ -74,7 +74,7 @@ class DashboardsControllerTest < Redmine::ControllerTest
   def test_create_with_default_should_unset_other_defaults
     # Ensure @dashboard is default initially (from fixture)
     assert @dashboard.is_default?, "Fixture dashboard should be default"
-    
+
     post :create, params: {
       dashboard: {
         name: 'New Default Dashboard',
@@ -82,11 +82,11 @@ class DashboardsControllerTest < Redmine::ControllerTest
         is_default: true
       }
     }
-    
+
     # Original default should no longer be default
     @dashboard.reload
     assert_not @dashboard.is_default?, "Original dashboard should no longer be default"
-    
+
     # New dashboard should be default
     new_dashboard = Dashboard.last
     assert new_dashboard.is_default?, "New dashboard should be default"
@@ -114,10 +114,10 @@ class DashboardsControllerTest < Redmine::ControllerTest
         description: 'Updated description'
       }
     }
-    
+
     assert_redirected_to my_dashboards_path
     assert flash[:notice].include?(I18n.t(:notice_dashboard_updated))
-    
+
     @dashboard.reload
     assert_equal 'Updated Dashboard', @dashboard.name
     assert_equal 'Updated description', @dashboard.description
@@ -130,7 +130,7 @@ class DashboardsControllerTest < Redmine::ControllerTest
         name: '' # invalid - empty name
       }
     }
-    
+
     assert_response :success
     assert_select '#errorExplanation'
   end
@@ -148,7 +148,7 @@ class DashboardsControllerTest < Redmine::ControllerTest
     assert_difference 'Dashboard.count', -1 do
       delete :destroy, params: { id: Dashboard.find(2).id } # non-default dashboard
     end
-    
+
     assert_redirected_to my_dashboards_path
     assert flash[:notice].include?(I18n.t(:notice_dashboard_deleted))
   end
@@ -164,15 +164,15 @@ class DashboardsControllerTest < Redmine::ControllerTest
   def test_set_default_should_make_dashboard_default
     non_default_dashboard = Dashboard.find(2) # belongs to user 2, not default
     assert_not non_default_dashboard.is_default?
-    
+
     patch :set_default, params: { id: non_default_dashboard.id }
-    
+
     assert_redirected_to my_dashboards_path
     assert flash[:notice].include?(I18n.t(:notice_dashboard_set_default))
-    
+
     non_default_dashboard.reload
     assert non_default_dashboard.is_default?
-    
+
     # Check that previous default is no longer default
     @dashboard.reload
     assert_not @dashboard.is_default?
@@ -186,7 +186,7 @@ class DashboardsControllerTest < Redmine::ControllerTest
 
   def test_should_require_login
     @request.session[:user_id] = nil
-    
+
     get :index
     assert_response :redirect
     assert_match %r{/login}, response.location
@@ -212,7 +212,7 @@ class DashboardsControllerTest < Redmine::ControllerTest
   def test_show_default_without_default_dashboard_should_redirect_to_index
     # Remove default dashboard
     @dashboard.update!(is_default: false)
-    
+
     get :show_default
     assert_redirected_to action: :index
   end

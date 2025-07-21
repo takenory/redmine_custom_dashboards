@@ -16,7 +16,7 @@ class DashboardPanelTest < ActiveSupport::TestCase
       grid_width: 10,
       grid_height: 10
     )
-    
+
     assert panel.valid?
     assert panel.save
   end
@@ -32,7 +32,7 @@ class DashboardPanelTest < ActiveSupport::TestCase
       grid_width: 10,
       grid_height: 10
     )
-    
+
     assert_not panel.valid?
     assert panel.errors[:position].present?
   end
@@ -47,7 +47,7 @@ class DashboardPanelTest < ActiveSupport::TestCase
       grid_width: 10,
       grid_height: 8
     )
-    
+
     # Grid size is 20px
     assert_equal 100, panel.pixel_x  # 5 * 20
     assert_equal 60, panel.pixel_y   # 3 * 20
@@ -114,12 +114,12 @@ class DashboardPanelTest < ActiveSupport::TestCase
       id: 1,
       grid_x: 0, grid_y: 0, grid_width: 10, grid_height: 10
     )
-    
+
     panel2 = DashboardPanel.new(
       id: 2,
       grid_x: 5, grid_y: 5, grid_width: 10, grid_height: 10
     )
-    
+
     panel3 = DashboardPanel.new(
       id: 3,
       grid_x: 20, grid_y: 20, grid_width: 10, grid_height: 10
@@ -179,7 +179,7 @@ class DashboardPanelTest < ActiveSupport::TestCase
     # Test setting config as hash
     config_hash = { "text_content" => "Hello World", "color" => "blue" }
     panel.config = config_hash
-    
+
     assert_equal config_hash, panel.config
     assert_equal '{"text_content":"Hello World","color":"blue"}', panel.panel_config
   end

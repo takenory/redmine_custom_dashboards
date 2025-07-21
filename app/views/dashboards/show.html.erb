@@ -44,7 +44,7 @@
       <%= sprite_icon('add', l(:button_add_panel)) %>
     </button>
   </div>
-  
+
 </div>
 
 <!-- ダッシュボード本体 -->
@@ -52,7 +52,7 @@
   <div id="dashboard-grid" class="dashboard-grid">
     <!-- グリッドの背景 -->
     <div class="grid-background"></div>
-    
+
     <!-- 既存のパネル -->
     <% @dashboard.dashboard_panels.visible.ordered.each do |panel| %>
       <div class="dashboard-panel" 
@@ -62,23 +62,23 @@
            data-grid-width="<%= panel.grid_width %>"
            data-grid-height="<%= panel.grid_height %>"
            style="left: <%= panel.pixel_x %>px; top: <%= panel.pixel_y %>px; width: <%= panel.pixel_width %>px; height: <%= panel.pixel_height %>px; z-index: <%= panel.z_index %>;">
-        
+
         <div class="panel-header">
           <span class="panel-title"><%= h(panel.title) %></span>
           <div class="panel-controls">
             <a href="#" class="panel-delete" data-panel-id="<%= panel.id %>" title="<%= l(:button_delete) %>"><%= sprite_icon('close') %></a>
           </div>
         </div>
-        
+
         <div class="panel-content">
           <%= render partial: "panels/#{panel.panel_type}", locals: { panel: panel } rescue render(partial: 'panels/default', locals: { panel: panel }) %>
         </div>
-        
+
         <!-- リサイズハンドル -->
         <div class="resize-handle resize-se"></div>
       </div>
     <% end %>
-    
+
     <!-- パネル追加時のプレビュー -->
     <div id="panel-preview" class="panel-preview" style="display: none;"></div>
   </div>

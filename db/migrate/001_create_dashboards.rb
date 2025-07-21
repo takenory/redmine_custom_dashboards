@@ -8,7 +8,7 @@ class CreateDashboards < ActiveRecord::Migration[6.1]
       t.text :layout_config
       t.timestamps
     end
-    
+
     add_index :dashboards, [:user_id, :is_default]
   end
 end

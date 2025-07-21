@@ -11,6 +11,6 @@ Rails.application.routes.draw do
       get :show_default
     end
   end
-  
+
   get 'my/dashboards', to: 'dashboards#index', as: 'my_dashboards'
 end

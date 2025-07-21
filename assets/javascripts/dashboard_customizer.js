@@ -58,7 +58,7 @@ class DashboardCustomizer {
   bindSinglePanelEvents(panel) {
     // ドラッグ開始
     panel.addEventListener('mousedown', (e) => this.handlePanelMouseDown(e, panel));
-    
+
     // パネル選択
     panel.addEventListener('click', (e) => this.selectPanel(panel));
 
@@ -82,7 +82,7 @@ class DashboardCustomizer {
   setupGrid() {
     const grid = document.getElementById('dashboard-grid');
     const gridBackground = grid.querySelector('.grid-background');
-    
+
     // グリッドクリックでパネル追加位置指定
     grid.addEventListener('click', (e) => {
       if (this.isCustomizeMode && this.isAddingPanel && !e.target.closest('.dashboard-panel')) {
@@ -119,10 +119,10 @@ class DashboardCustomizer {
 
   startAddPanel() {
     if (!this.isCustomizeMode) return;
-    
+
     this.isAddingPanel = true;
     this.showMessage(this.translations.clickToPlacePanel || 'Click to specify placement position', 'info');
-    
+
     // マウス追従プレビュー
     document.addEventListener('mousemove', this.handleAddPanelMouseMove.bind(this));
   }
@@ -606,7 +606,7 @@ class DashboardCustomizer {
       flashArea.textContent = message;
       flashArea.className = type === 'error' ? 'flash error' : 'flash notice';
       flashArea.style.display = 'block';
-      
+
       setTimeout(() => {
         flashArea.style.display = 'none';
       }, 3000);
